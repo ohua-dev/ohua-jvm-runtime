@@ -20,10 +20,14 @@ import ohua.runtime.engine.utils.parser.ProcessConfigurationLoader;
 
 public abstract class AbstractProcessRunner implements Runnable
 {
-  protected RuntimeProcessConfiguration _config = new RuntimeProcessConfiguration();
-  protected AbstractProcessManager _manager = null;
+  RuntimeProcessConfiguration _config = new RuntimeProcessConfiguration();
+  AbstractProcessManager _manager = null;
   
   private Supplier<DataFlowProcess> _parser = null;
+
+  public AbstractProcessRunner(AbstractProcessManager manager){
+    _manager = manager;
+  }
 
   @Deprecated
   public AbstractProcessRunner(String pathToFlow)
@@ -50,7 +54,7 @@ public abstract class AbstractProcessRunner implements Runnable
     _config._properties.put(key, value);
   }
 
-  protected final void initializeProcessManager() {
+  final void initializeProcessManager() {
     DataFlowProcess process = deserializeFlow();
     process.getGraph().repopulateOperatorRegistry();
     _manager = _config.getProcessManager(process);

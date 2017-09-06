@@ -8,13 +8,24 @@ package ohua.runtime.engine.operators;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ohua.runtime.engine.daapi.InputPortControl;
 import ohua.runtime.engine.daapi.OutputPortControl;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
+import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public class SplitOperator extends UserOperator {
+
+  public static OperatorDescription description(){
+    OperatorDescription desc = new OperatorDescription();
+    desc.setInputPorts(Collections.singletonList("input"));
+    desc.setOutputPorts(Collections.emptyList());
+    desc.setDynamicOutputPorts(true);
+    return desc;
+  }
+
   public static class SplitOperatorProperties implements Serializable {
     public int _schedulingInterval = 1;
     

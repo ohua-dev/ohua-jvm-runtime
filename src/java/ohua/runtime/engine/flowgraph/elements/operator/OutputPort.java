@@ -40,6 +40,12 @@ public class OutputPort extends AbstractPort implements GraphNodeOutput {
     init();
   }
 
+  public OutputPort(OperatorCore op, String name) {
+    this(op);
+    setPortName(name);
+  }
+
+
   public OutputPort(OperatorCore op, PortID portID) {
     super(op, portID);
     init();

@@ -15,7 +15,6 @@ import ohua.runtime.test.util.TestUtil;
 import org.junit.Assert;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 
 import ohua.runtime.engine.ProcessID.ProcessIDGenerator;
@@ -37,6 +36,7 @@ public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
     OperatorFactory.getInstance().registerUserOperator("DeterministicMerge", DeterministicMergeOperator.class, DeterministicMergeOperator.description());
     OperatorFactory.getInstance().registerUserOperator("NonDeterministicMerge", NonDeterministicMergeOperator.class, NonDeterministicMergeOperator.description());
     OperatorFactory.getInstance().registerUserOperator("Peek", PeekOperator.class, PeekOperator.description());
+    OperatorFactory.getInstance().registerUserOperator("Split", SplitOperator.class, SplitOperator.description());
   }
 
   @Before
@@ -114,8 +114,7 @@ public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
 
   public final void runFlowNoAssert(AbstractProcessManager manager) throws Throwable
   {
-    ProcessRunner runner = new ProcessRunner();
-    runner.setManager(manager);
+    ProcessRunner runner = new ProcessRunner(manager);
     try
     {
       runner.run();

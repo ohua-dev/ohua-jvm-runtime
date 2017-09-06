@@ -77,8 +77,8 @@ public class AbstractRegressionTestCase extends AbstractOhuaTestCase {
 
     @Before
     public void regressionSetup() {
-        regressionClassDirectorySetup();
-        regressionMethodDirectorySetup();
+//        regressionClassDirectorySetup();
+//        regressionMethodDirectorySetup();
 
         // some test cases might fail or do not call teardown, hence this line makes sure we always
         // start from a clean state id-wise.

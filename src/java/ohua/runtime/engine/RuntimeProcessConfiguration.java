@@ -58,7 +58,7 @@ public class RuntimeProcessConfiguration implements Serializable {
     throw new IllegalArgumentException("Arg '" + arg + "' has wrong type '" + arg.getClass() + "'.");
   }
 
-  protected Properties _properties = new Properties();
+  public Properties _properties = new Properties();
 
   public void setProperties(Properties properties) {
     _properties = properties;

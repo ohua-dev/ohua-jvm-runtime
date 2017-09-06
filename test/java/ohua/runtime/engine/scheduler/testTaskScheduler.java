@@ -5,10 +5,8 @@
  */
 package ohua.runtime.engine.scheduler;
 
-import ohua.runtime.engine.AbstractProcessManager;
-import ohua.runtime.engine.ProcessRunner;
-import ohua.runtime.engine.RuntimeProcessConfiguration;
-import ohua.runtime.engine.WorkBasedRuntime;
+import ohua.runtime.engine.*;
+import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.flowgraph.elements.operator.AbstractOperatorRuntime;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
 import ohua.runtime.engine.flowgraph.elements.operator.WorkBasedOperatorRuntime;
@@ -21,36 +19,28 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class testTaskScheduler extends AbstractFlowTestCase {
   private Consumer<HashMap<String, Object>> _registerWorkBasedRuntime;
 
-  private String getSimpleFlowInputDirectory() {
-    return getTestMethodInputDirectory().replace("testTaskScheduler", "testMultiThreadingFramework").replace(testName.getMethodName(),
-            "testSimpleFlow");
-  }
-
-  private String getComplexNDFlowInputDirectory() {
-    return getTestMethodInputDirectory().replace("testTaskScheduler", "testMultiThreadingFramework").replace(testName.getMethodName(),
-            "testComplexFlow");
-  }
-
-  private String getComplexDFlowInputDirectory() {
-    return getTestMethodInputDirectory().replace("testTaskScheduler", "testMultiThreadingFramework").replace(testName.getMethodName(),
-            "testComplexFlow2");
-  }
-
-  private String getEnginePhasesInputDir() {
-    return getTestMethodInputDirectory().replace("testTaskScheduler", "testMultiThreadingFramework").replace("testEnginePhases",
-            "testComplexFlow4");
-  }
-
   private int threadPoolSize = 1;
   private int desiredWorkSize = -1;
 
-  protected ProcessRunner createProcessRunner(String pathToFlow) {
-    ProcessRunner runner = super.createProcessRunner(pathToFlow);
+  protected ProcessRunner createProcessRunner(Supplier<DataFlowProcess> process) {
+    ProcessRunner runner = super.createProcessRunner(process);
+    prepareWorkbasedRuntime(runner);
+    return runner;
+  }
+
+  protected ProcessRunner createProcessRunner(Supplier<DataFlowProcess> process, RuntimeProcessConfiguration config) {
+    ProcessRunner runner = super.createProcessRunner(process, config);
+    prepareWorkbasedRuntime(runner);
+    return runner;
+  }
+
+  private void prepareWorkbasedRuntime(ProcessRunner runner){
     _registerWorkBasedRuntime = (newProps) -> runner.getConfig()
             .aquirePropertiesAccess(props -> {
               props.put(WorkBasedTaskScheduler.DESIRED_WORK_SIZE, desiredWorkSize == -1 ? runner.getConfig().getInterSectionArcBoundary() : desiredWorkSize);
@@ -59,14 +49,16 @@ public class testTaskScheduler extends AbstractFlowTestCase {
               props.putAll(newProps);
 
             });
-    return runner;
   }
 
   @Test(timeout = 10000)
   public void testEnginePhases() throws Throwable {
+    RuntimeProcessConfiguration config = new RuntimeProcessConfiguration();
+    config._properties.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE, RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
+    config._properties.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE, 20);
+    config._properties.put(RuntimeProcessConfiguration.BuiltinProperties.ARC_BOUNDARY, 25);
     AbstractProcessManager manager =
-            loadProcess(getEnginePhasesInputDir() + "1-Op-1-Section-complex-correctness-flow-2.xml",
-                    getTestClassInputDirectory() + "testComplexFlow4/runtime-parameters.properties");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"), config);
     _registerWorkBasedRuntime.accept(new HashMap<>());
     manager.initializeProcess();
     manager.awaitSystemPhaseCompletion();
@@ -82,7 +74,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testSimpleFlowWithoutOperatorScheduling() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getSimpleFlowInputDirectory() + "1-Op-1-Section-simple-correctness-flow.xml");
+            loadProcess(testNotificationBasedRuntime.oneOpOneSectionBuilderSimpleCorrectnessFlow(100));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.SINGLE_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.ARC_BOUNDARY.getKey(), 1000);
@@ -102,7 +94,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testSimpleFlowWithOperatorScheduling() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getSimpleFlowInputDirectory() + "1-Op-1-Section-simple-correctness-flow.xml");
+            loadProcess(testNotificationBasedRuntime.oneOpOneSectionBuilderSimpleCorrectnessFlow(100));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.SINGLE_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.ARC_BOUNDARY.getKey(), 25);
@@ -124,7 +116,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testSimpleFlowWithTaskSchedulingSequential() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getSimpleFlowInputDirectory() + "1-Op-1-Section-simple-correctness-flow.xml");
+            loadProcess(testNotificationBasedRuntime.oneOpOneSectionBuilderSimpleCorrectnessFlow(100));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put("core-thread-pool-size", 1);
@@ -147,7 +139,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testSimpleFlowWithTaskSchedulingParallel() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getSimpleFlowInputDirectory() + "1-Op-1-Section-simple-correctness-flow.xml");
+            loadProcess(testNotificationBasedRuntime.oneOpOneSectionBuilderSimpleCorrectnessFlow(100));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 2);
@@ -169,7 +161,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexNDMergeFlowWithoutOperatorScheduling() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexNDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("NonDeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.SINGLE_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.ARC_BOUNDARY.getKey(), 1000);
@@ -187,7 +179,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexNDMergeFlowWithOperatorScheduling() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexNDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("NonDeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.SINGLE_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.ARC_BOUNDARY.getKey(), 25);
@@ -211,7 +203,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexNDMergeFlowWithTaskSchedulingSequential() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexNDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("NonDeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 1);
@@ -229,7 +221,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexNDMergeFlowWithTaskSchedulingParallel() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexNDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("NonDeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 2);
@@ -253,7 +245,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexDMergeFlowWithoutOperatorScheduling() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.SINGLE_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.ARC_BOUNDARY.getKey(), 1000);
@@ -267,11 +259,11 @@ public class testTaskScheduler extends AbstractFlowTestCase {
             ((ConsumerOperator) manager.getProcess().getGraph().getOperator("Right-Consumer").getOperatorAlgorithm()).getSeenPackets());
   }
 
-  @Test//(timeout = 10000)
+  @Test(timeout = 10000)
   public void testComplexDMergeFlowWithOperatorScheduling() throws Throwable {
     int dataAmount = 50;
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     ((GeneratorOperator) manager.getProcess().getGraph().getOperator("Left-DataGenerator").getOperatorAlgorithm())
             .getProperties().setAmountToGenerate(dataAmount);
     ((GeneratorOperator) manager.getProcess().getGraph().getOperator("Right-DataGenerator").getOperatorAlgorithm())
@@ -289,9 +281,9 @@ public class testTaskScheduler extends AbstractFlowTestCase {
     try {
       runFlowNoAssert(manager);
 
-      Assert.assertEquals(100,
+      Assert.assertEquals(dataAmount,
               ((ConsumerOperator) manager.getProcess().getGraph().getOperator("Left-Consumer").getOperatorAlgorithm()).getSeenPackets());
-      Assert.assertEquals(100,
+      Assert.assertEquals(dataAmount,
               ((ConsumerOperator) manager.getProcess().getGraph().getOperator("Right-Consumer").getOperatorAlgorithm()).getSeenPackets());
     } catch (Throwable t) {
       System.out.println(trace);
@@ -312,7 +304,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   public void testComplexDMergeFlowWithOperatorSchedulingNonDeterministicBug() throws Throwable {
     int dataAmount = 50;
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     ((GeneratorOperator) manager.getProcess().getGraph().getOperator("Left-DataGenerator").getOperatorAlgorithm())
             .getProperties().setAmountToGenerate(dataAmount);
     ((GeneratorOperator) manager.getProcess().getGraph().getOperator("Right-DataGenerator").getOperatorAlgorithm())
@@ -327,18 +319,18 @@ public class testTaskScheduler extends AbstractFlowTestCase {
             "ProcessController", "Entrance", "Right-DataGenerator", "Right-Input-Logger", "Right-DataGenerator",
             "Left-DataGenerator", "Left-Input-Logger", "Left-DataGenerator", "DataMerge", "Left-Input-Logger",
             "Logger", "Right-Input-Logger", "Right-DataGenerator", "Left-DataGenerator", "DataMerge",
-            "Left-Input-Logger", "Right-Input-Logger", "DataSplit", "Right-Output-Logger", "Right-Database-Output",
+            "Left-Input-Logger", "Right-Input-Logger", "DataSplit", "Right-Output-Logger", "Right-Consumer",
             "Logger", "DataMerge", "Left-Input-Logger", "Right-Input-Logger", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "Logger", "DataMerge", "DataSplit", "Logger", "DataMerge", "DataSplit", "Logger",
+            "Right-Consumer", "Logger", "DataMerge", "DataSplit", "Logger", "DataMerge", "DataSplit", "Logger",
             "DataMerge", "DataSplit", "Logger", "DataMerge", "DataSplit", "Logger", "DataMerge", "DataSplit",
             "Logger", "DataMerge", "DataSplit", "Logger", "DataMerge", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "Logger", "DataMerge", "DataSplit", "Logger", "DataSplit", "Logger",
+            "Right-Consumer", "Logger", "DataMerge", "DataSplit", "Logger", "DataSplit", "Logger",
             "DataSplit", "Logger", "DataSplit", "Logger", "DataSplit", "Logger", "DataSplit", "Logger", "DataSplit",
             "Logger", "DataSplit", "Logger", "DataSplit", "Logger", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "Logger", "DataSplit", "DataSplit", "DataSplit", "DataSplit", "DataSplit",
+            "Right-Consumer", "Logger", "DataSplit", "DataSplit", "DataSplit", "DataSplit", "DataSplit",
             "DataSplit", "DataSplit", "DataSplit", "DataSplit", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "DataSplit", "Left-Output-Logger", "Left-Database-Output", "Left-Output-Logger",
-            "Left-Database-Output", "Left-Output-Logger", "Left-Database-Output"//, "Exit"
+            "Right-Consumer", "DataSplit", "Left-Output-Logger", "Left-Consumer", "Left-Output-Logger",
+            "Left-Consumer", "Left-Output-Logger", "Left-Consumer"//, "Exit"
     );
     ArrayList<String> schedule = new ArrayList<>(scheduleToBug);
     props.put(WorkBasedOperatorScheduler.SCHEDULING_ALGO, (WorkBasedOperatorScheduler.IOperatorSchedulingAlgorithm) (graph, ops) -> {
@@ -354,16 +346,16 @@ public class testTaskScheduler extends AbstractFlowTestCase {
 
     runFlowNoAssert(manager);
 
-    Assert.assertEquals(100,
+    Assert.assertEquals(dataAmount,
             ((ConsumerOperator) manager.getProcess().getGraph().getOperator("Left-Consumer").getOperatorAlgorithm()).getSeenPackets());
-    Assert.assertEquals(100,
+    Assert.assertEquals(dataAmount,
             ((ConsumerOperator) manager.getProcess().getGraph().getOperator("Right-Consumer").getOperatorAlgorithm()).getSeenPackets());
   }
 
   @Test(timeout = 10000)
   public void testComplexDMergeFlowWithTaskSchedulingSequentialNonDeterministicBug() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 1);
@@ -371,14 +363,14 @@ public class testTaskScheduler extends AbstractFlowTestCase {
 
     String[] scheduleToBug = new String[]{"ProcessController", "Entrance", "Left-DataGenerator",
             "Left-Input-Logger", "Left-DataGenerator", "DataMerge", "Left-Input-Logger", "Left-DataGenerator",
-            "Logger", "DataSplit", "Right-Output-Logger", "Right-Database-Output", "Exit", "Left-Output-Logger",
-            "Left-Database-Output", "Exit", "Right-DataGenerator", "Right-Input-Logger", "DataMerge", "Logger",
-            "DataSplit", "Right-Output-Logger", "Right-Database-Output", "DataMerge", "Left-Input-Logger",
-            "Left-DataGenerator", "Left-Output-Logger", "Left-Database-Output", "Logger", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "Left-Output-Logger", "Left-Database-Output", "Right-DataGenerator",
-            "Right-Input-Logger", "DataMerge", "Logger", "DataSplit", "Right-Output-Logger", "Right-Database-Output",
-            "DataMerge", "Left-Output-Logger", "Left-Database-Output", "Logger", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "Left-Output-Logger", "Left-Database-Output", "Right-DataGenerator", "Right-Input-Logger",
+            "Logger", "DataSplit", "Right-Output-Logger", "Right-Consumer", "Exit", "Left-Output-Logger",
+            "Left-Consumer", "Exit", "Right-DataGenerator", "Right-Input-Logger", "DataMerge", "Logger",
+            "DataSplit", "Right-Output-Logger", "Right-Consumer", "DataMerge", "Left-Input-Logger",
+            "Left-DataGenerator", "Left-Output-Logger", "Left-Consumer", "Logger", "DataSplit", "Right-Output-Logger",
+            "Right-Consumer", "Left-Output-Logger", "Left-Consumer", "Right-DataGenerator",
+            "Right-Input-Logger", "DataMerge", "Logger", "DataSplit", "Right-Output-Logger", "Right-Consumer",
+            "DataMerge", "Left-Output-Logger", "Left-Consumer", "Logger", "DataSplit", "Right-Output-Logger",
+            "Right-Consumer", "Left-Output-Logger", "Left-Consumer", "Right-DataGenerator", "Right-Input-Logger",
             "Right-DataGenerator"};
     List<String> schedule = new ArrayList<>(Arrays.asList(scheduleToBug));
     props.put(WorkBasedTaskScheduler.SCHEDULING_ALGO, (WorkBasedTaskScheduler.ISchedulingAlgorithm) (gr, workSize, possibleWork) -> {
@@ -403,7 +395,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 50000)
   public void testComplexDMergeFlowWithTaskSchedulingSequential() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 1);
@@ -421,7 +413,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexDMergeFlowWithTaskSchedulingParallel() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 2);
@@ -439,7 +431,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexNDMergeFlowWithTaskSchedulingSequentialLastAlgo() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexNDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("NonDeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 1);
@@ -464,7 +456,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   @Test(timeout = 10000)
   public void testComplexDMergeFlowWithTaskSchedulingSequentialLastAlgo() throws Throwable {
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 1);
@@ -495,16 +487,16 @@ public class testTaskScheduler extends AbstractFlowTestCase {
    */
   @Test
   public void testComplexSectionMappingNDMergeFlow() throws Throwable {
-    runComplexSectionMappingFlow(getComplexNDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow.xml");
+    runComplexSectionMappingFlow(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("NonDeterministicMerge"));
   }
 
   @Test
   public void testComplexSectionMappingDMergeFlow() throws Throwable {
-    runComplexSectionMappingFlow(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+    runComplexSectionMappingFlow(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
   }
 
-  private void runComplexSectionMappingFlow(String pathToFlow) throws Throwable {
-    AbstractProcessManager manager = loadProcess(pathToFlow);
+  private void runComplexSectionMappingFlow(FlowGraph graph) throws Throwable {
+    AbstractProcessManager manager = loadProcess(graph);
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 1);
@@ -512,8 +504,8 @@ public class testTaskScheduler extends AbstractFlowTestCase {
     ConfigurableSectionMapper sectionMapper = new ConfigurableSectionMapper(null);
     List<List<String>> mapping = new LinkedList<>();
     mapping.add(Arrays.asList("Left-DataGenerator", "Left-Input-Logger", "Right-Input-Logger",
-            "DataMerge", "Logger", "DataSplit", "Left-Output-Logger", "Left-Database-Output", "Right-Output-Logger",
-            "Right-Database-Output"));
+            "DataMerge", "Logger", "DataSplit", "Left-Output-Logger", "Left-Consumer", "Right-Output-Logger",
+            "Right-Consumer"));
     mapping.add(Arrays.asList("Right-DataGenerator"));
     sectionMapper.setSectionsMapping(mapping);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.SECTION_STRATEGY.getKey(), sectionMapper);
@@ -543,7 +535,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
     int threadPoolSize = 3;
 
     this.threadPoolSize = threadPoolSize;
-    runComplexSectionMappingFlow(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+    runComplexSectionMappingFlow(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
   }
 
 
@@ -551,14 +543,14 @@ public class testTaskScheduler extends AbstractFlowTestCase {
   public void testSmallWorkComplexSectionMappingDMergeFlow() throws Throwable {
 
     this.desiredWorkSize = 10;
-    runComplexSectionMappingFlow(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+    runComplexSectionMappingFlow(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
   }
 
   @Test(timeout = 10000)
   public void testComplexDMergeFlowWithTaskSchedulingSequentialNonDeterministicBugAndLowWorkSize() throws Throwable {
     desiredWorkSize = 5;
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 1);
@@ -566,14 +558,14 @@ public class testTaskScheduler extends AbstractFlowTestCase {
 
     String[] scheduleToBug = new String[]{"ProcessController", "Entrance", "Left-DataGenerator",
             "Left-Input-Logger", "Left-DataGenerator", "DataMerge", "Left-Input-Logger", "Left-DataGenerator",
-            "Logger", "DataSplit", "Right-Output-Logger", "Right-Database-Output", "Exit", "Left-Output-Logger",
-            "Left-Database-Output", "Exit", "Right-DataGenerator", "Right-Input-Logger", "DataMerge", "Logger",
-            "DataSplit", "Right-Output-Logger", "Right-Database-Output", "DataMerge", "Left-Input-Logger",
-            "Left-DataGenerator", "Left-Output-Logger", "Left-Database-Output", "Logger", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "Left-Output-Logger", "Left-Database-Output", "Right-DataGenerator",
-            "Right-Input-Logger", "DataMerge", "Logger", "DataSplit", "Right-Output-Logger", "Right-Database-Output",
-            "DataMerge", "Left-Output-Logger", "Left-Database-Output", "Logger", "DataSplit", "Right-Output-Logger",
-            "Right-Database-Output", "Left-Output-Logger", "Left-Database-Output", "Right-DataGenerator", "Right-Input-Logger",
+            "Logger", "DataSplit", "Right-Output-Logger", "Right-Consumer", "Exit", "Left-Output-Logger",
+            "Left-Consumer", "Exit", "Right-DataGenerator", "Right-Input-Logger", "DataMerge", "Logger",
+            "DataSplit", "Right-Output-Logger", "Right-Consumer", "DataMerge", "Left-Input-Logger",
+            "Left-DataGenerator", "Left-Output-Logger", "Left-Consumer", "Logger", "DataSplit", "Right-Output-Logger",
+            "Right-Consumer", "Left-Output-Logger", "Left-Consumer", "Right-DataGenerator",
+            "Right-Input-Logger", "DataMerge", "Logger", "DataSplit", "Right-Output-Logger", "Right-Consumer",
+            "DataMerge", "Left-Output-Logger", "Left-Consumer", "Logger", "DataSplit", "Right-Output-Logger",
+            "Right-Consumer", "Left-Output-Logger", "Left-Consumer", "Right-DataGenerator", "Right-Input-Logger",
             "Right-DataGenerator"};
     List<String> schedule = new ArrayList<>(Arrays.asList(scheduleToBug));
     props.put(WorkBasedTaskScheduler.SCHEDULING_ALGO, (WorkBasedTaskScheduler.ISchedulingAlgorithm) (gr, workSize, possibleWork) -> {
@@ -592,7 +584,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
     desiredWorkSize = 5;
 
     AbstractProcessManager manager =
-            loadProcess(getComplexDFlowInputDirectory() + "1-Op-1-Section-complex-correctness-flow-2.xml");
+            loadProcess(testEnginePhasesMT.oneOpOneSectionComplexCorrectnessFlow2("DeterministicMerge"));
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);
     props.put(RuntimeProcessConfiguration.BuiltinProperties.CORE_THREAD_POOL_SIZE.getKey(), 2);
@@ -618,9 +610,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
     int dataAmount = 5;
     desiredWorkSize = 10;
     AbstractProcessManager manager =
-            loadProcess(getSimpleFlowInputDirectory() + "1-Op-1-Section-simple-correctness-flow.xml");
-    ((GeneratorOperator) manager.getProcess().getGraph().getOperator("TestGenerator").getOperatorAlgorithm())
-            .getProperties().setAmountToGenerate(dataAmount);
+            loadProcess(testNotificationBasedRuntime.oneOpOneSectionBuilderSimpleCorrectnessFlow(dataAmount));
 
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.SINGLE_THREADED);
@@ -643,9 +633,7 @@ public class testTaskScheduler extends AbstractFlowTestCase {
     int dataAmount = 5;
     desiredWorkSize = 10;
     AbstractProcessManager manager =
-            loadProcess(getSimpleFlowInputDirectory() + "1-Op-1-Section-simple-correctness-flow.xml");
-    ((GeneratorOperator) manager.getProcess().getGraph().getOperator("TestGenerator").getOperatorAlgorithm())
-            .getProperties().setAmountToGenerate(dataAmount);
+            loadProcess(testNotificationBasedRuntime.oneOpOneSectionBuilderSimpleCorrectnessFlow(dataAmount));
 
     HashMap<String, Object> props = new HashMap<>();
     props.put(RuntimeProcessConfiguration.BuiltinProperties.EXECUTION_MODE.getKey(), RuntimeProcessConfiguration.Parallelism.MULTI_THREADED);

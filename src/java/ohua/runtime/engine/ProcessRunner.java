@@ -17,8 +17,8 @@ public final class ProcessRunner extends AbstractProcessRunner {
     super(pathToFlow);
   }
   
-  public ProcessRunner() {
-    super((String) null);
+  public ProcessRunner(AbstractProcessManager manager) {
+    super(manager);
   }
   
   public ProcessRunner(Supplier<DataFlowProcess> loader) {
@@ -29,11 +29,6 @@ public final class ProcessRunner extends AbstractProcessRunner {
     super(loader, config);
   }
 
-
-  public void setManager(AbstractProcessManager manager) {
-    _manager = manager;
-  }
-  
   @Override
   public void loadRuntimeConfiguration(String pathToRuntimeConfiguration) throws IOException,
                                                                          ClassNotFoundException
