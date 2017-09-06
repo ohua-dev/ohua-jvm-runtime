@@ -11,18 +11,16 @@ import ohua.runtime.engine.flowgraph.elements.abstraction.Graph;
 import ohua.runtime.engine.flowgraph.elements.operator.*;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FlowGraph implements Graph<OperatorCore>
 {
-  private List<Arc> _arcs = new LinkedList<Arc>();
+  private List<Arc> _arcs = new LinkedList<>();
   
-  private Map<PortID, AbstractPort> _portRegistry = new LinkedHashMap<PortID, AbstractPort>();
+  private Map<PortID, AbstractPort> _portRegistry = new LinkedHashMap<>();
   
-  private Map<OperatorID, OperatorCore> _operatorRegistry = new LinkedHashMap<OperatorID, OperatorCore>();
+  private Map<OperatorID, OperatorCore> _operatorRegistry = new LinkedHashMap<>();
   
   private int _highestOperatorID = 0;
   private int _lowestOperatorID = 100000;
@@ -73,7 +71,7 @@ public class FlowGraph implements Graph<OperatorCore>
   
   public static List<OperatorCore> getAllDownstreamNeighbors(Operator inputOperator) {
     assert inputOperator != null;
-    List<OperatorCore> downstreamNeighbors = new ArrayList<OperatorCore>();
+    List<OperatorCore> downstreamNeighbors = new ArrayList<>();
     
     for(OutputPort outPort : inputOperator.getOutputPorts()) {
       for(Arc outArc : outPort.getOutgoingArcs()) {
@@ -86,16 +84,15 @@ public class FlowGraph implements Graph<OperatorCore>
     assert !downstreamNeighbors.isEmpty();
     return downstreamNeighbors;
   }
-  
+
   public void debug() {
-    Logger logger = Logger.getLogger(getClass().getCanonicalName());
-    logger.log(Level.FINE, "Graph info:");
-    logger.log(Level.FINE, "Included operators:");
+    System.out.println("Graph info:");
+    System.out.println("Included operators:");
     for(OperatorCore op : getContainedGraphNodes()) {
-      logger.log(Level.FINE, op.getOperatorName());
+      System.out.println(op.getOperatorName());
     }
   }
-  
+
   public OperatorCore getOperator(String operatorName) {
     for(OperatorCore operator : _operatorRegistry.values()) {
       if(operator.getOperatorName().equals(operatorName)) {
@@ -129,7 +126,7 @@ public class FlowGraph implements Graph<OperatorCore>
     _highestOperatorID = 0;
     _lowestOperatorID = 100000;
     
-    HashMap<OperatorID, OperatorCore> operatorRegistry = new HashMap<OperatorID, OperatorCore>(_operatorRegistry);
+    HashMap<OperatorID, OperatorCore> operatorRegistry = new HashMap<>(_operatorRegistry);
     _operatorRegistry.clear();
     _portRegistry.clear();
     for(OperatorCore op : operatorRegistry.values()) {
@@ -139,7 +136,7 @@ public class FlowGraph implements Graph<OperatorCore>
   
   public List<OperatorCore> getOperators(String regex) {
     Pattern p = Pattern.compile(regex);
-    List<OperatorCore> ops = new ArrayList<OperatorCore>();
+    List<OperatorCore> ops = new ArrayList<>();
     for(OperatorCore op : _operatorRegistry.values()) {
       Matcher matcher = p.matcher(op.getOperatorName());
       if(matcher.matches()) {

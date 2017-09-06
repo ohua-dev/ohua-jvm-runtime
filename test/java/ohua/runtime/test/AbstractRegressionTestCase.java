@@ -33,22 +33,17 @@ import java.util.logging.Logger;
 
 public class AbstractRegressionTestCase extends AbstractOhuaTestCase {
     protected static final String testNS = "test.flow";
-    private final static String TEST_ROOT_DIRECTORY = "/src/test/";
-    private final static String TEST_BASELINE_DIRECTORY = TEST_ROOT_DIRECTORY + "baseline/";
+    private final static String TEST_ROOT_DIRECTORY = "test/java/";
     private final static String TEST_OUTPUT_DIRECTORY = "test-output/";
     @Rule
     public TestName testName = new TestName();
-    protected List<FileHandler> _writers = new ArrayList<FileHandler>();
-    protected Logger _newLogger = null;
+    protected List<FileHandler> _writers = new ArrayList<>();
     // test input
     private String _testClassDirectory = null;
     private String _testMethodDirectory = null;
     // test output
     private String _testClassOutputDirectory = null;
     private String _testMethodOutputDirectory = null;
-    // test baseline
-    private String _testClassBaselineDirectory = null;
-    private String _testMethodBaselineDirectory = null;
 
     protected static void clearCache() {
         JavaBackendProvider.clearCache();
@@ -66,68 +61,7 @@ public class AbstractRegressionTestCase extends AbstractOhuaTestCase {
         JavaBackendProvider.loadCoreOperators();
     }
 
-    protected final void outputLogToFile(Logger logger) throws IOException {
-        outputLogToFile(logger, Level.ALL);
-    }
-
-    protected final void outputLogToFile(String loggerName, Level level) throws IOException {
-        outputLogToFile(OhuaLoggerFactory.getLogger(loggerName), level);
-    }
-
-    protected final void outputOperatorLogToFile(Class<?> operatorType,
-                                                 String operatorName,
-                                                 String operatorID,
-                                                 Level level) throws IOException {
-        outputLogToFile(OhuaLoggerFactory.getLogIDForOperator(operatorType,
-                operatorName,
-                operatorID), level);
-    }
-
-    protected final void outputLogToFile(Logger logger, Level level) throws IOException {
-        Level existingLevel = null;
-        Logger log = logger;
-        while (existingLevel == null) {
-            if (log.getLevel() != null) {
-                existingLevel = log.getLevel();
-            } else {
-                log = log.getParent();
-            }
-        }
-        Assertion.invariant(existingLevel != null);
-        if (level.intValue() < existingLevel.intValue()) {
-            logger.setLevel(level);
-        }
-
-        FileHandler writer =
-                OhuaLoggingUtils.outputLogToFile(logger, level, getTestMethodOutputDirectory());
-        _writers.add(writer);
-    }
-
-    protected final void outputLogsToSingleFile(Iterable<String> loggers, Level level) throws IOException {
-        FileHandler handler =
-                OhuaLoggingUtils.createLogFileHandler("singleFileLogger",
-                        level,
-                        getTestMethodOutputDirectory());
-        handler.setFormatter(new OhuaLoggingFormatter());
-        _writers.add(handler);
-        for (String loggerID : loggers) {
-            Logger logger = OhuaLoggerFactory.getLogger(loggerID);
-            logger.addHandler(handler);
-        }
-    }
-
-    protected final void outputLogToFile(String name) throws IOException {
-        // find the logger
-        Logger logger = Logger.getLogger(name);
-        outputLogToFile(logger);
-    }
-
-    protected final void outputLogToFile(Class<?> loggerClass) throws IOException {
-        // find the logger
-        Logger logger = Logger.getLogger(loggerClass.getCanonicalName());
-        outputLogToFile(logger);
-    }
-
+    @Deprecated
     public final String getTestMethodInputDirectory() {
         return _testMethodDirectory;
     }
@@ -136,83 +70,26 @@ public class AbstractRegressionTestCase extends AbstractOhuaTestCase {
         return _testClassDirectory;
     }
 
+    @Deprecated
     public final String getTestMethodOutputDirectory() {
         return _testMethodOutputDirectory;
-    }
-
-    public final String getTestClassOutputDirectory() {
-        return _testClassOutputDirectory;
-    }
-
-    protected final String getTestMethodBaselineDirectoy() {
-        return _testMethodBaselineDirectory;
-    }
-
-    protected final String getTestClassBaselineDirectoy() {
-        return _testClassBaselineDirectory;
     }
 
     @Before
     public void regressionSetup() {
         regressionClassDirectorySetup();
         regressionMethodDirectorySetup();
-        loggerSetup();
 
         // some test cases might fail or do not call teardown, hence this line makes sure we always
         // start from a clean state id-wise.
         AbstractProcessManager.resetCounters();
     }
 
-    private void loggerSetup() {
-        // redirect the logging to System.out and System.err files stored in the output directory of
-        // this test case.
-        Logger defaultLogger = Logger.getLogger("");
-        defaultLogger.setLevel(Level.ALL);
-        try {
-//            FileHandler logFileHandler =
-//                    OhuaLoggingUtils.createLogFileHandler("Console.out",
-//                            Level.ALL,
-//                            _testMethodOutputDirectory);
-//            logFileHandler.setFormatter(new OhuaLoggingFormatter());
-//            defaultLogger.addHandler(logFileHandler);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-
-        // configure the logger for the test method.
-        _newLogger = Logger.getLogger(testName.getMethodName());
-        _newLogger.info("************************************ running test: " + testName.getMethodName()
-                + " ************************************************");
-    }
-
     private void regressionClassDirectorySetup() {
-        String canonicalName = getClass().getCanonicalName();
-        String[] packageComponents = canonicalName.split("\\p{Punct}");
-
-        String projectDir = findProjectDirectory();
-        String srcFolder = projectDir + File.separator +
-                packageComponents[0] + "." + packageComponents[1] + "." + packageComponents[2];
-        _testClassDirectory = srcFolder + TEST_ROOT_DIRECTORY + getClass().getSimpleName() + "/";
-        _testClassBaselineDirectory =
-                srcFolder + TEST_BASELINE_DIRECTORY + getClass().getCanonicalName() + "/";
+        _testClassDirectory = TEST_ROOT_DIRECTORY + getClass().getPackage().getName().replace(".", "/") + "/";
         _testClassOutputDirectory = TEST_OUTPUT_DIRECTORY + getClass().getCanonicalName() + "/";
 
         createOutputClassDirectory();
-    }
-
-    // TODO this is certainly not the best way to find the root directory!
-    private String findProjectDirectory() {
-        File f = new File(".");
-        Iterator<File> it = org.apache.commons.io.FileUtils.iterateFiles(f, new String[]{"txt"}, true);
-        while (it.hasNext()) {
-            File c = it.next();
-            if (c.getName().equals("LICENSE.txt")) {
-                return c.getParent();
-            }
-        }
-
-        throw new RuntimeException("Project directory not found.");
     }
 
     private void createOutputClassDirectory() {
@@ -231,7 +108,6 @@ public class AbstractRegressionTestCase extends AbstractOhuaTestCase {
     private void regressionMethodDirectorySetup() {
         _testMethodDirectory = _testClassDirectory + testName.getMethodName() + "/";
         _testMethodOutputDirectory = _testClassOutputDirectory + testName.getMethodName() + "/";
-        _testMethodBaselineDirectory = _testClassBaselineDirectory + testName.getMethodName() + "/";
 
         createOutputMethodDirectory();
     }
@@ -263,9 +139,5 @@ public class AbstractRegressionTestCase extends AbstractOhuaTestCase {
                 handler.close();
             }
         }
-    }
-
-    protected final String loadFileContents(String fileName) throws IOException {
-        return FileUtils.loadFileContents(new File(getTestMethodInputDirectory() + fileName));
     }
 }

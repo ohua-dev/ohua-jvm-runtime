@@ -87,12 +87,4 @@ public class FunctionalOperatorFactory implements IOperatorFactory {
         OperatorFactory.getInstance().clear();
     }
 
-    public String getSourceCodeReference(String name) {
-        return OperatorFactory.getInstance().getSourceCodeReference(name);
-    }
-
-    public Collection<String> getRegisteredOperatorClasses() {
-        return OperatorFactory.getInstance().getRegisteredOperatorClasses();
-    }
-
 }

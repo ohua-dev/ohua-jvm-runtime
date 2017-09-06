@@ -6,14 +6,20 @@
 
 package ohua.runtime.engine;
 
-import java.io.File;
-
+import ohua.runtime.engine.flowgraph.elements.FlowGraph;
+import ohua.runtime.engine.flowgraph.elements.operator.Arc;
+import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
+import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
+import ohua.runtime.engine.operators.AbstractMergeOperator;
+import ohua.runtime.engine.operators.GeneratorOperator;
 import ohua.runtime.test.AbstractFlowTestCase;
 import org.junit.Assert;
 
 import org.junit.Test;
 
 import ohua.runtime.engine.operators.ConsumerOperator;
+
+import java.util.Collections;
 
 /**
  * Our flow-under-test will be the DeterministicMerge-correctness-flow because this turns out to
@@ -24,23 +30,45 @@ import ohua.runtime.engine.operators.ConsumerOperator;
  */
 public class testEnginePhases extends AbstractFlowTestCase
 {
-  private AbstractProcessManager loadProcess() throws Throwable
-  {
-    return loadProcess(getTestClassInputDirectory()
-                        + "DeterministicMerge-correctness-Consumer-flow.xml");
-  }
 
-  private AbstractProcessManager loadProcess(File pathToRuntimeProperties) throws Throwable
-  {
-    return loadProcess(getTestClassInputDirectory()
-                           + "DeterministicMerge-correctness-Consumer-flow.xml",
-                       pathToRuntimeProperties.getAbsolutePath());
+  public static FlowGraph deterministicMergeCorrectnessConsumerFlow() throws Exception {
+    FlowGraph graph = new FlowGraph();
+    OperatorCore gen1 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Generator");
+    gen1.setOperatorName("Left-DataGenerator");
+    OperatorCore gen2 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Generator");
+    gen2.setOperatorName("Right-DataGenerator");
+    OperatorCore merge = OperatorFactory.getInstance().createUserOperatorCore(graph, "DeterministicMerge");
+    merge.setOperatorName("DataMerge");
+    OperatorCore peek = OperatorFactory.getInstance().createUserOperatorCore(graph, "Peek");
+    peek.setOperatorName("Logger");
+    OperatorCore consumer = OperatorFactory.getInstance().createUserOperatorCore(graph, "Consumer");
+    consumer.setOperatorName("Consumer");
+
+    graph.addArc(new Arc(gen1.getOutputPort("output"), merge.getInputPort("input_1")));
+    graph.addArc(new Arc(gen2.getOutputPort("output"), merge.getInputPort("input_2")));
+    graph.addArc(new Arc(merge.getOutputPort("output"), peek.getInputPort("input")));
+    graph.addArc(new Arc(peek.getOutputPort("output"), consumer.getInputPort("input")));
+
+    GeneratorOperator.GeneratorProperties props1 = new GeneratorOperator.GeneratorProperties();
+    props1.setAmountToGenerate(50);
+    props1.setSchema(Collections.singletonList("test"));
+    ((GeneratorOperator) gen1.getOperatorAlgorithm()).setProperties(props1);
+    GeneratorOperator.GeneratorProperties props2 = new GeneratorOperator.GeneratorProperties();
+    props2.setAmountToGenerate(50);
+    props2.setStartOffset(50);
+    props2.setSchema(Collections.singletonList("test"));
+    ((GeneratorOperator) gen2.getOperatorAlgorithm()).setProperties(props2);
+    AbstractMergeOperator.MergeOperatorProperties mergeProps = new AbstractMergeOperator.MergeOperatorProperties();
+    mergeProps.setDequeueBatchSize(1);
+    ((AbstractMergeOperator) merge.getOperatorAlgorithm()).setProperties(mergeProps);
+
+    return graph;
   }
 
   @Test(timeout = 8000)
   public void testInitPhase() throws Throwable
   {
-    AbstractProcessManager manager = loadProcess();
+    AbstractProcessManager manager = loadProcess(deterministicMergeCorrectnessConsumerFlow());
     manager.initializeProcess();
     manager.awaitSystemPhaseCompletion();
     
@@ -50,7 +78,7 @@ public class testEnginePhases extends AbstractFlowTestCase
   @Test(timeout = 8000)
   public void testComputationPhase() throws Throwable
   {
-    AbstractProcessManager manager = loadProcess();
+    AbstractProcessManager manager = loadProcess(deterministicMergeCorrectnessConsumerFlow());
     manager.initializeProcess();
     manager.awaitSystemPhaseCompletion();
     manager.runProcessStartUp();
@@ -73,7 +101,7 @@ public class testEnginePhases extends AbstractFlowTestCase
   @Test(timeout = 8000)
   public void testTearDownPhase() throws Throwable
   {
-    AbstractProcessManager manager = loadProcess();
+    AbstractProcessManager manager = loadProcess(deterministicMergeCorrectnessConsumerFlow());
     manager.initializeProcess();
     manager.awaitSystemPhaseCompletion();
     manager.runProcessStartUp();
@@ -101,9 +129,10 @@ public class testEnginePhases extends AbstractFlowTestCase
    * scheduled again by its downstream operator in order to close out on its computation.
    */
   @Test//(timeout = 8000)
-  public void testComputationPhase2() throws Throwable
-  {
-    AbstractProcessManager manager = loadProcess(new File(getTestMethodInputDirectory() + "runtime-parameters.properties"));
+  public void testComputationPhase2() throws Throwable {
+    RuntimeProcessConfiguration config = new RuntimeProcessConfiguration();
+    config._properties.setProperty("arc-boundary", "25");
+    AbstractProcessManager manager = loadProcess(deterministicMergeCorrectnessConsumerFlow(), config);
     manager.initializeProcess();
     manager.awaitSystemPhaseCompletion();
 

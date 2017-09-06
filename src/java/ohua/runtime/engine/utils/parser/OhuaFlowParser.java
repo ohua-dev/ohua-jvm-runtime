@@ -357,23 +357,23 @@ public class OhuaFlowParser extends DataFlowComposition implements ContentHandle
     try
     {
       OperatorCore op = super.loadOperator(value, (FlowGraph)_callStack.peek());
-      // FIXME only add it once!
-      Mapping propertiesMapping =
-          OperatorFactory.getInstance().getOperatorDescription(value).getPropertiesMapping();
-      if(propertiesMapping != null)
-      {
-        _unmarshalContext.addMapping(propertiesMapping);
-      }
+//      // FIXME only add it once!
+//      Mapping propertiesMapping =
+//          OperatorFactory.getInstance().getOperatorDescription(value).getPropertiesMapping();
+//      if(propertiesMapping != null)
+//      {
+//        _unmarshalContext.addMapping(propertiesMapping);
+//      }
       return op;
     }
     catch(OperatorLoadingException e)
     {
       throw new SAXParseException(e.getMessage(), XMLParserException.getLocator());
     }
-    catch(MappingException e)
-    {
-      throw new SAXParseException(e.getMessage(), XMLParserException.getLocator());
-    }
+//    catch(MappingException e)
+//    {
+//      throw new SAXParseException(e.getMessage(), XMLParserException.getLocator());
+//    }
   }
     
   private String parseProperty(Attributes atts)

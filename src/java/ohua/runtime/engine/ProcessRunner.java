@@ -7,6 +7,7 @@
 package ohua.runtime.engine;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import ohua.runtime.engine.flowgraph.DataFlowComposition;
 
@@ -20,10 +21,15 @@ public final class ProcessRunner extends AbstractProcessRunner {
     super((String) null);
   }
   
-  public ProcessRunner(DataFlowComposition loader) {
+  public ProcessRunner(Supplier<DataFlowProcess> loader) {
     super(loader);
   }
-  
+
+  public ProcessRunner(Supplier<DataFlowProcess> loader, RuntimeProcessConfiguration config) {
+    super(loader, config);
+  }
+
+
   public void setManager(AbstractProcessManager manager) {
     _manager = manager;
   }

@@ -6,6 +6,8 @@
 
 package ohua.runtime.engine;
 
+import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
+import ohua.runtime.engine.operators.system.ProcessControlOperator;
 import ohua.runtime.engine.points.PacketFactory;
 import ohua.runtime.engine.flowgraph.elements.ArcID.ArcIDGenerator;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
@@ -31,6 +33,10 @@ public abstract class AbstractProcessManager implements
                                             ISystemEventListener
 {
 
+  static{
+    OperatorFactory.getInstance().registerSystemOperator("ProcessController", ProcessControlOperator.class, ProcessControlOperator.description());
+  }
+
   protected Logger _logger = Logger.getLogger(getClass().getCanonicalName());
   private volatile SystemPhaseType _systemPhase = SystemPhaseType.INITIALIZATION;
   private DataFlowProcess _process = null;
@@ -53,8 +59,6 @@ public abstract class AbstractProcessManager implements
    * scheduler!
    */
   private Optional<Throwable> _runtimeFailure = Optional.empty();
-
-  private SystemEventManager _eventManager = new SystemEventManager();
 
   private ReentrantLock _pendingEngineCallbackLock = new ReentrantLock();
   private Condition _pendingEngineCallbackCondition = _pendingEngineCallbackLock.newCondition();

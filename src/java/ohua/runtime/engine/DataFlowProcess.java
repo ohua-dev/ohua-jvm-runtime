@@ -40,10 +40,10 @@ public class DataFlowProcess
   private ProcessID _processID = ProcessID.ProcessIDGenerator.generateNewProcessID();
   
   private List<PortID> _eosNeeded = null;
-  
-  public void setGraph(FlowGraph graph)
-  {
+
+  public DataFlowProcess setGraph(FlowGraph graph) {
     _graph = graph;
+    return this;
   }
 
   public FlowGraph getGraph()

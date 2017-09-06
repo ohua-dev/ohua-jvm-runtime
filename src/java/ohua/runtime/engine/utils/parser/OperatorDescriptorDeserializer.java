@@ -198,7 +198,6 @@ public class OperatorDescriptorDeserializer
     // parse the properties (castor mappings)
     if(castorInputStream.available() > 0) {
       Mapping propertiesMapping = new Mapping();
-      description.setPropertiesMapping(propertiesMapping);
       propertiesMapping.loadMapping(new InputSource(castorInputStream));
       castorInputStream.close();
     }

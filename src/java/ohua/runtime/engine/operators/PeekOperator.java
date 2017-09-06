@@ -6,16 +6,24 @@
 
 package ohua.runtime.engine.operators;
 
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import ohua.runtime.engine.daapi.InputPortControl;
 import ohua.runtime.engine.daapi.OutputPortControl;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
-import ohua.runtime.engine.utils.OhuaLoggerFactory;
+import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public class PeekOperator extends UserOperator
 {
+  public static OperatorDescription description(){
+    OperatorDescription desc = new OperatorDescription();
+    desc.setInputPorts(Collections.singletonList("input"));
+    desc.setOutputPorts(Collections.singletonList("output"));
+    return desc;
+  }
+
   private InputPortControl _inPortControl = null;
   private OutputPortControl _outPortControl = null;
   

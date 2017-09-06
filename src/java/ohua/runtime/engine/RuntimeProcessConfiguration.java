@@ -188,15 +188,7 @@ public class RuntimeProcessConfiguration implements Serializable {
   }
   
   public DataFormat getDataFormat() {
-    String dataFormatClass =
-        _properties.getProperty("data-format", "com.ohua.data.model.json.JSONDataFormat").trim();
-    try {
-      return (DataFormat) Class.forName(dataFormatClass).newInstance();
-    }
-    catch(Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
+    return (DataFormat) _properties.get("data-format");
   }
   
   public void setCoreThreadPoolSize(int i) {
@@ -218,20 +210,7 @@ public class RuntimeProcessConfiguration implements Serializable {
   public int getSectionSize() {
     return Integer.parseInt(_properties.getProperty("section-size", "2").trim());
   }
-  
-  /**
-   * Does not only allow one more thread in the thread pool whenever an I/O section is executing
-   * but allows to execute this operator although it is already executing.
-   * @return
-   */
-  public boolean getAdvancedNonblockingIO() {
-    return Boolean.parseBoolean(_properties.getProperty("advanced-non-blocking-io", "false").trim());
-  }
-  
-  public boolean enableOnlineConfigurationSupport() {
-    return Boolean.parseBoolean(_properties.getProperty("online-configuration-support", "true").trim());
-  }
-  
+
   public int getOperatorQuanta() {
     return Integer.parseInt(_properties.getProperty("operator-quanta", "1000").trim());
   }

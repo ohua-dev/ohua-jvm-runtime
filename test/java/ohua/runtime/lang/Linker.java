@@ -100,7 +100,7 @@ public abstract class Linker {
   private static void load(final String packageName, boolean reload) {
     String javaPackageName = packageName.replace("-", "_");
     List<Path> paths = FileUtils.loadFromClasspath(javaPackageName.replace(".", "/"), "*.class");
-    OperatorFactory.registryFilter = "{Ohua,Language}*Registry.xml";
+//    OperatorFactory.registryFilter = "{Ohua,Language}*Registry.xml";
     FunctionalOperatorFactory opFactory = FunctionalOperatorFactory.getInstance();
     for(Path path : paths) {
       String className = path.getFileName().toString().replaceAll(".class$", "");

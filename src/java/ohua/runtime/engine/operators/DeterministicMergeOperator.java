@@ -6,13 +6,17 @@
 
 package ohua.runtime.engine.operators;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import ohua.runtime.engine.daapi.InputPortControl;
 import ohua.runtime.engine.exceptions.Assertion;
+import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 /**
  * ATTENTION: This operator does not work with cycles! It will end up in a deadlock state when
@@ -22,6 +26,7 @@ import ohua.runtime.engine.exceptions.Assertion;
  * 
  */
 public class DeterministicMergeOperator extends AbstractMergeOperator {
+
   private int _currentPortIndex = 0;
   private int _packetsDequeuedFromCurrentPort = 0;
   

@@ -6,83 +6,112 @@
 
 package ohua.runtime.test;
 
-import ohua.runtime.engine.AbstractRuntime;
+import ohua.runtime.engine.*;
+import ohua.runtime.engine.daapi.MapDataFormat;
 import ohua.runtime.engine.flowgraph.elements.operator.*;
+import ohua.runtime.engine.operators.*;
 import ohua.runtime.engine.scheduler.AbstractScheduler;
 import ohua.runtime.test.util.TestUtil;
 import org.junit.Assert;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 
-import ohua.runtime.engine.AbstractProcessManager;
 import ohua.runtime.engine.ProcessID.ProcessIDGenerator;
-import ohua.runtime.engine.ProcessRunner;
 import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.flowgraph.elements.operator.AbstractPort.PortState;
 import ohua.runtime.engine.flowgraph.elements.operator.AbstractOperatorStateMachine.OperatorState;
 import ohua.runtime.engine.utils.GraphVisualizer;
 
+import java.util.function.Supplier;
+
 @Ignore
 public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
 {
 
-    @Before
+  @Before
+  public void loadTestOps(){
+    OperatorFactory.getInstance().registerUserOperator("Generator", GeneratorOperator.class, GeneratorOperator.description());
+    OperatorFactory.getInstance().registerUserOperator("Consumer", ConsumerOperator.class, ConsumerOperator.description());
+    OperatorFactory.getInstance().registerUserOperator("DeterministicMerge", DeterministicMergeOperator.class, DeterministicMergeOperator.description());
+    OperatorFactory.getInstance().registerUserOperator("NonDeterministicMerge", NonDeterministicMergeOperator.class, NonDeterministicMergeOperator.description());
+    OperatorFactory.getInstance().registerUserOperator("Peek", PeekOperator.class, PeekOperator.description());
+  }
+
+  @Before
   public void resetProcessCounter()
   {
     ProcessIDGenerator.resetIDCounter();
   }
-  
-  protected final void runFlow(String pathToFlow) throws Throwable
-  {
-    runFlowNoAssert(pathToFlow);
-  }
-  
-  protected final void runFlowNoAssert(String pathToFlow) throws Throwable
-  {
-    ProcessRunner runner = createProcessRunner(pathToFlow);
-    try
-    {
-      runner.run();
-    }
-    catch(RuntimeException t)
-    {
-      if(t.getCause() != null)
-      {
-        throw t.getCause();
-      }
-      else
-      {
-        throw t;
-      }
-    }
-  }
-  
-  protected ProcessRunner createProcessRunner(String pathToFlow)
-  {
+
+  @Deprecated
+  protected ProcessRunner createProcessRunner(String pathToFlow) {
     return new ProcessRunner(pathToFlow);
   }
-  
+
+  protected ProcessRunner createProcessRunner(Supplier<DataFlowProcess> process) {
+    return new ProcessRunner(process);
+  }
+
+  protected ProcessRunner createProcessRunner(Supplier<DataFlowProcess> process, RuntimeProcessConfiguration config) {
+    return new ProcessRunner(process, config);
+  }
+
+  @Deprecated
   public final AbstractProcessManager loadProcess(String pathToFlow) throws Throwable
   {
     ProcessRunner runner = createProcessRunner(pathToFlow);
-    AbstractProcessManager processManager = (AbstractProcessManager) runner.getProcessManager();
+    AbstractProcessManager processManager = runner.getProcessManager();
     GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
     GraphVisualizer.printFlowGraph(processManager.getProcess().getGraph());
     return processManager;
   }
-  
+
+  @Deprecated
   public final AbstractProcessManager loadProcess(String pathToFlow,
-                                                  String pathToRuntimeProperties) throws Throwable
-  {
+                                                  String pathToRuntimeProperties) throws Throwable {
     ProcessRunner runner = createProcessRunner(pathToFlow);
     runner.loadRuntimeConfiguration(pathToRuntimeProperties);
-    AbstractProcessManager processManager = (AbstractProcessManager) runner.getProcessManager();
+    AbstractProcessManager processManager = runner.getProcessManager();
 //    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
 //    GraphVisualizer.printFlowGraph(processManager.getProcess().getGraph());
     return processManager;
   }
-  
+
+  public final AbstractProcessManager loadProcess(FlowGraph graph) throws Throwable
+  {
+    ProcessRunner runner = createProcessRunner(() -> new DataFlowProcess().setGraph(graph), new RuntimeProcessConfiguration());
+    runner.addProperty("data-format", new MapDataFormat());
+    AbstractProcessManager processManager = runner.getProcessManager();
+//    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
+//    GraphVisualizer.printFlowGraph(processManager.getProcess().getGraph());
+    return processManager;
+  }
+
+  public final AbstractProcessManager loadProcess(FlowGraph graph,
+                                                  String pathToRuntimeProperties) throws Throwable
+  {
+    ProcessRunner runner = createProcessRunner(() -> new DataFlowProcess().setGraph(graph));
+    runner.loadRuntimeConfiguration(pathToRuntimeProperties);
+    runner.addProperty("data-format", new MapDataFormat());
+    AbstractProcessManager processManager = runner.getProcessManager();
+//    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
+//    GraphVisualizer.printFlowGraph(processManager.getProcess().getGraph());
+    return processManager;
+  }
+
+  public final AbstractProcessManager loadProcess(FlowGraph graph,
+                                                  RuntimeProcessConfiguration config) throws Throwable
+  {
+    ProcessRunner runner = createProcessRunner(() -> new DataFlowProcess().setGraph(graph), config);
+    runner.addProperty("data-format", new MapDataFormat());
+    AbstractProcessManager processManager = runner.getProcessManager();
+//    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
+//    GraphVisualizer.printFlowGraph(processManager.getProcess().getGraph());
+    return processManager;
+  }
+
   public final void runFlowNoAssert(AbstractProcessManager manager) throws Throwable
   {
     ProcessRunner runner = new ProcessRunner();
@@ -104,26 +133,14 @@ public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
     }
     
   }
-  
-  public final void runFlow(String pathToFlow, String pathToRuntimeProperties) throws Throwable
-  {
-    runFlowNoAssert(pathToFlow, pathToRuntimeProperties);
-  }
-  
+
   public final FlowGraph runFlowGetGraph(String pathToFlow, String pathToRuntimeProperties) throws Throwable
   {
     AbstractProcessManager manager = loadProcess(pathToFlow, pathToRuntimeProperties);
     runFlowNoAssert(manager);
     return manager.getProcess().getGraph();
   }
-  
-  public final void runFlowNoAssert(String pathToFlow, String pathToRuntimeProperties) throws Throwable
-  {
-    ProcessRunner runner = createProcessRunner(pathToFlow);
-    runner.loadRuntimeConfiguration(pathToRuntimeProperties);
-    runner.run();
-  }
-  
+
   protected void performDataPhaseAssertions(AbstractProcessManager manager)
   {
     performGeneralSystemPhaseAssertions(manager);
@@ -250,17 +267,6 @@ public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
         Assert.assertTrue(printArcData(arc), arc.isQueueEmpty());
       }
     }
-    
-    // FIXME this check is deactivated for now. the problem is that the init phase is not yet
-    // cycle-save and there could not be completed using an EOS marker
-    // an EOS is always sent now therefore all input ports must have seen the last packet
-    // for(AbstractOperator operator : manager.getProcess().getGraph().getContainedGraphNodes())
-    // {
-    // for(InputPort inPort : operator.getInputPorts())
-    // {
-    // Assert.assertTrue(inPort.hasSeenLastPacket());
-    // }
-    // }
   }
   
   private String printArcData(Arc arc)

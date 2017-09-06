@@ -22,7 +22,8 @@ public class OperatorDescription implements Cloneable
   private boolean _dynamicInputPorts = false;
   private boolean _dynamicOutputPorts = false;
 
-  private Mapping _propertiesMapping = null;
+//  private Mapping _propertiesMapping = null;
+  private Class<?> _properties = null;
   
   public void apply(OperatorCore operator, boolean isUserOperator)
   {
@@ -59,15 +60,15 @@ public class OperatorDescription implements Cloneable
     _outputPorts = outputPorts;
   }
 
-  public Mapping getPropertiesMapping()
-  {
-    return _propertiesMapping;
-  }
-
-  public void setPropertiesMapping(Mapping propertiesMapping)
-  {
-    _propertiesMapping = propertiesMapping;
-  }
+//  public Mapping getPropertiesMapping()
+//  {
+//    return _propertiesMapping;
+//  }
+//
+//  public void setPropertiesMapping(Mapping propertiesMapping)
+//  {
+//    _propertiesMapping = propertiesMapping;
+//  }
     
   public void setDyanmicInputPorts(boolean dynamic)
   {

@@ -15,23 +15,20 @@ import ohua.runtime.engine.utils.parser.OperatorDescription;
 import ohua.runtime.engine.utils.parser.OperatorDescriptorDeserializer;
 import ohua.runtime.engine.utils.parser.OperatorMappingParser;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-@Deprecated
+@Deprecated // TODO just remove the XML stuff here! descriptors can be inner classes of the ops.
 public class OperatorFactory implements IOperatorFactory
 {
-  public static String registryFilter = "*Registry.xml";
-  // TODO this thing will eventually be extended with a remote database to be queried for
   // operators
-  private static Map<String, String> _userOperatorRegistry = null;
-  private static Map<String, String> _systemOperatorRegistry = null;
+  private static Map<String, String> _userOperatorRegistry = new HashMap<>();
+  private static Map<String, String> _systemOperatorRegistry = new HashMap<>();
   private static OperatorFactory _factory = new OperatorFactory();
-  private Map<String, OperatorDescription> _operatorDescriptors = new HashMap<String, OperatorDescription>();
+  private Map<String, OperatorDescription> _operatorDescriptors = new HashMap<>();
   private OperatorDescriptorDeserializer _descriptorDeserializer = new OperatorDescriptorDeserializer();
   private boolean _applyDescriptorForUserOperators = true;
 
@@ -40,86 +37,31 @@ public class OperatorFactory implements IOperatorFactory
   }
 
   public static OperatorFactory getInstance() {
-    if(_userOperatorRegistry == null) {
-      OperatorMappingParser parser = new OperatorMappingParser();
-      try {
-        // TODO this should probably not use the system operators because on listing all user
-        // ops there should be no system ops listed!
-        _userOperatorRegistry = parser.loadOperatorMappings(registryFilter);
-      } catch(XMLParserException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    if(_systemOperatorRegistry == null) {
-      OperatorMappingParser parser = new OperatorMappingParser();
-      try {
-        _systemOperatorRegistry = parser.loadOperatorMappings("*SystemComponentRegistry.xml");
-      } catch(XMLParserException e) {
-        throw new RuntimeException(e);
-      }
-    }
+//    if(_userOperatorRegistry == null) {
+//      OperatorMappingParser parser = new OperatorMappingParser();
+//      try {
+//        // TODO this should probably not use the system operators because on listing all user
+//        // ops there should be no system ops listed!
+//        _userOperatorRegistry = parser.loadOperatorMappings(registryFilter);
+//      } catch(XMLParserException e) {
+//        throw new RuntimeException(e);
+//      }
+//    }
+//
+//    if(_systemOperatorRegistry == null) {
+//      OperatorMappingParser parser = new OperatorMappingParser();
+//      try {
+//        _systemOperatorRegistry = parser.loadOperatorMappings("*SystemComponentRegistry.xml");
+//      } catch(XMLParserException e) {
+//        throw new RuntimeException(e);
+//      }
+//    }
 
     return _factory;
   }
 
-  /**
-   * This function assumes that the source code of the operator x.y.z.op is located in
-   * x.y.z/src/java
-   *
-   * @param operator
-   * @return
-   */
-  public static String getSourceCodeReference(OperatorCore operator) {
-    String clsName = getInstance().getSourceCodeReference(operator.getOperatorType());
-    String[] packagePath = clsName.split("\\.");
-    StringBuffer sourceCodeRef = new StringBuffer();
-    sourceCodeRef.append(packagePath[0]);
-    sourceCodeRef.append(".");
-    sourceCodeRef.append(packagePath[1]);
-    sourceCodeRef.append(".");
-    sourceCodeRef.append(packagePath[2]);
-    sourceCodeRef.append(File.pathSeparator);
-    sourceCodeRef.append(clsName.replace(".", File.pathSeparator));
-    return sourceCodeRef.toString();
-  }
-
   public static OperatorDescription getOperatorDescription(OperatorCore operator) {
     return getInstance().getOperatorDescription(operator.getOperatorType());
-  }
-
-  public static OperatorCore cloneOperator(FlowGraph graph, OperatorCore original) {
-    try {
-      OperatorCore newReplica =
-              OperatorFactory.getInstance().createUserOperatorCore(graph,
-                      ((UserOperator) original.getOperatorAlgorithm()).getClass(),
-                      original.getOperatorType());
-      cloneDynamicStructure(original, newReplica);
-      return newReplica;
-    } catch (OperatorLoadingException e) {
-      Assertion.impossible(e);
-    }
-
-    assert false;
-    return null;
-  }
-
-  private static void cloneDynamicStructure(OperatorCore original, OperatorCore newReplica) {
-    OperatorDescription description = getOperatorDescription(original);
-    if (description.hasDynamicInputPorts()) {
-      for (InputPort inPort : original.getInputPorts()) {
-        InputPort copy = new InputPort(newReplica);
-        newReplica.addInputPort(copy);
-        copy.setPortName(inPort.getPortName());
-      }
-    }
-    if (description.hasDynamicOutputPorts()) {
-      for (OutputPort outPort : original.getOutputPorts()) {
-        OutputPort copy = new OutputPort(newReplica);
-        newReplica.addOutputPort(copy);
-        copy.setPortName(outPort.getPortName());
-      }
-    }
   }
 
   public void setApplyDescriptorsForUserOperators(boolean apply) {
@@ -247,8 +189,8 @@ public class OperatorFactory implements IOperatorFactory
     _userOperatorRegistry.put(operatorName, clz.getName());
   }
 
-  private OperatorDescription
-  loadOperatorDescriptor(String operatorName, boolean isUserOperator) throws OperatorLoadingException {
+  // FIXME redo this!
+  private OperatorDescription loadOperatorDescriptor(String operatorName, boolean isUserOperator) throws OperatorLoadingException {
     if(_operatorDescriptors.containsKey(operatorName)) {
       return _operatorDescriptors.get(operatorName);
     }
@@ -281,22 +223,10 @@ public class OperatorFactory implements IOperatorFactory
     return _userOperatorRegistry.get(operatorName);
   }
 
-  public UserOperator
-  createUserOperator(FlowGraph graph, String operatorType, String displayName) throws OperatorLoadingException {
+  public UserOperator createUserOperator(FlowGraph graph, String operatorType, String displayName) throws OperatorLoadingException {
     UserOperator operator = createUserOperatorInstance(operatorType);
     OperatorCore core = prepareUserOperator(graph, operatorType, operator);
     core.setOperatorName(displayName);
-    return operator;
-  }
-
-  public SystemOperator createSystemOperator(Class<? extends SystemOperator> clz, String operatorName) {
-    SystemOperator operator = null;
-    try {
-      operator = createOperatorInstance(clz);
-      prepareSystemOperator(operatorName, operator);
-    } catch(OperatorLoadingException e) {
-      Assertion.impossible(e);
-    }
     return operator;
   }
 
@@ -315,13 +245,6 @@ public class OperatorFactory implements IOperatorFactory
     _descriptorDeserializer = descriptorDeserializer;
   }
 
-  public UserOperator replaceUserOperator(OperatorCore core, UserOperator newOp) {
-    AbstractOperatorAlgorithm old = core.getOperatorAdapter()._operatorAlgorithm;
-    core.getOperatorAdapter()._operatorAlgorithm = newOp;
-    newOp.setOperatorAlgorithmAdapter(core.getOperatorAdapter());
-    return (UserOperator) old;
-  }
-
   public boolean registerUserOperator(String alias, String implReference) {
     return registerUserOperator(alias, implReference, false);
   }
@@ -333,6 +256,18 @@ public class OperatorFactory implements IOperatorFactory
       _userOperatorRegistry.put(alias, implReference);
       return true;
     }
+  }
+
+  public boolean registerUserOperator(String alias, Class<? extends UserOperator> opType, OperatorDescription description) {
+    _userOperatorRegistry.put(alias, opType.getName());
+    _operatorDescriptors.put(alias, description);
+    return true;
+  }
+
+  public boolean registerSystemOperator(String alias, Class<? extends SystemOperator> opType, OperatorDescription description) {
+    _systemOperatorRegistry.put(alias, opType.getName());
+    _operatorDescriptors.put(alias, description);
+    return true;
   }
 
   public Set<String> getRegisteredUserOperators() {

@@ -1,16 +1,27 @@
 package ohua.runtime.engine.operators;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ohua.runtime.engine.daapi.InputPortControl;
 import ohua.runtime.engine.daapi.OutputPortControl;
 import ohua.runtime.engine.exceptions.Assertion;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
+import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public abstract class AbstractMergeOperator extends UserOperator
 {
+  public static OperatorDescription description(){
+    OperatorDescription desc = new OperatorDescription();
+    desc.setInputPorts(Arrays.stream(new String[]{"input_1", "input_2"}).collect(Collectors.toList()));
+    desc.setOutputPorts(Collections.singletonList("output"));
+    return desc;
+  }
+
   public static class MergeOperatorProperties implements Serializable
   {
     private int _dequeueBatchSize = 50;

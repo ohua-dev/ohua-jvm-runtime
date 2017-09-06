@@ -6,13 +6,22 @@
 
 package ohua.runtime.engine.operators;
 
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import ohua.runtime.engine.daapi.InputPortControl;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
+import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public class ConsumerOperator extends UserOperator
 {
+  public static OperatorDescription description(){
+    OperatorDescription desc = new OperatorDescription();
+    desc.setInputPorts(Collections.singletonList("input"));
+    desc.setOutputPorts(Collections.EMPTY_LIST);
+    return desc;
+  }
+
   // parameters for testing/regression purposes
   private int _seenPackets = 0;
   private boolean _keepLastPacket = false;

@@ -8,18 +8,28 @@ package ohua.runtime.engine.operators;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import ohua.runtime.engine.daapi.OutputPortControl;
+import ohua.runtime.engine.flowgraph.elements.operator.Operator;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
+import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public class GeneratorOperator extends UserOperator
 {
+  public static OperatorDescription description(){
+    OperatorDescription desc = new OperatorDescription();
+    desc.setInputPorts(Collections.EMPTY_LIST);
+    desc.setOutputPorts(Collections.singletonList("output"));
+    return desc;
+  }
+
   public static class GeneratorProperties implements Serializable
   {
     private int _amountToGenerate;
     private int _startOffset = 0;
-    private String _pathToSchemaFile = null;
+    private List<String> _schema;
 
     public int getAmountToGenerate()
     {
@@ -40,16 +50,11 @@ public class GeneratorOperator extends UserOperator
     {
       _startOffset = startOffset;
     }
-    
-    public void setPathToSchemaFile(String pathToSchemaFile)
-    {
-      _pathToSchemaFile = pathToSchemaFile;
+
+    public void setSchema(List<String> schema){
+      _schema = schema;
     }
-    
-    public String getPathToSchemaFile()
-    {
-      return _pathToSchemaFile;
-    }
+
   }
   
   private int _alreadySent = 0;
@@ -62,7 +67,6 @@ public class GeneratorOperator extends UserOperator
   public void prepare()
   {
     _outPortControl = getDataLayer().getOutputPortController("output");
-    _outPortControl.load(new File(_properties.getPathToSchemaFile()));
   }
   
   @Override
@@ -72,7 +76,7 @@ public class GeneratorOperator extends UserOperator
     for(int i = _alreadySent + 1; i < _properties.getAmountToGenerate() + 1; i++)
     {
       _outPortControl.newPacket();
-      for(String leafPath : _outPortControl.getLeafs())
+      for(String leafPath : _properties._schema)
       {
         int value = _properties.getStartOffset() + i;
         _outPortControl.setData(leafPath, getTestValue(leafPath, value));
@@ -93,24 +97,24 @@ public class GeneratorOperator extends UserOperator
   {
     List<Object> val = _outPortControl.getData(leafPath);
     
-    if(val != null && val.size() == 1 && val.get(0).toString().length() > 0)
-    {
-      Object defaultValue = val.get(0);
-      if(defaultValue.equals("int"))
-      {
-        return Integer.toString(value);
-      }
-      else if(defaultValue.toString().startsWith("mod"))
-      {
-        String modNumber = defaultValue.toString().substring(4);
-        int mod = Integer.parseInt(modNumber.trim());
-        return Integer.toString(value % mod);
-      }
-      else
-      {
-        return defaultValue.toString() + "-" + value;
-      }
-    }
+//    if(val != null && val.size() == 1 && val.get(0).toString().length() > 0)
+//    {
+//      Object defaultValue = val.get(0);
+//      if(defaultValue.equals("int"))
+//      {
+//        return Integer.toString(value);
+//      }
+//      else if(defaultValue.toString().startsWith("mod"))
+//      {
+//        String modNumber = defaultValue.toString().substring(4);
+//        int mod = Integer.parseInt(modNumber.trim());
+//        return Integer.toString(value % mod);
+//      }
+//      else
+//      {
+//        return defaultValue.toString() + "-" + value;
+//      }
+//    }
     
     // default
     return "testValue-" + value;

@@ -6,6 +6,7 @@
 
 package ohua.runtime.engine.operators.system;
 
+import java.util.Collections;
 import java.util.LinkedList;
 
 import ohua.runtime.engine.exceptions.InvariantBroken;
@@ -14,9 +15,18 @@ import ohua.runtime.engine.flowgraph.elements.operator.SystemOperator;
 import ohua.runtime.engine.flowgraph.elements.packets.ActivationMarker;
 import ohua.runtime.engine.flowgraph.elements.packets.EndOfStreamPacket;
 import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
+import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public class ProcessControlOperator extends SystemOperator
 {
+
+  public static OperatorDescription description(){
+    OperatorDescription desc = new OperatorDescription();
+    desc.setInputPorts(Collections.EMPTY_LIST);
+    desc.setOutputPorts(Collections.singletonList("output"));
+    return desc;
+  }
+
   private ExternalMetaInput _externalInput = null;
   
   public interface ExternalMetaInput

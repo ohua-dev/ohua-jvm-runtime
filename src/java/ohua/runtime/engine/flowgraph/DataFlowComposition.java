@@ -13,8 +13,10 @@ import ohua.runtime.engine.flowgraph.elements.operator.IOperatorFactory;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 
+import java.util.function.Supplier;
+
 // TODO all below elements should probably not be public
-public abstract class DataFlowComposition
+public abstract class DataFlowComposition implements Supplier<DataFlowProcess>
 {
   protected final DataFlowProcess createProcess() {
     return new DataFlowProcess();
@@ -44,7 +46,15 @@ public abstract class DataFlowComposition
   protected abstract OperatorCore findOperator(FlowGraph graph, int id);
   
   public abstract DataFlowProcess load() throws Exception;
-  
+
+  public DataFlowProcess get(){
+    try{
+      return load();
+    }catch(Exception e){
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * Called whenever an operator with such a name does not exist. The according subclass can use
    * this as a hook for example to convert between different naming conventions (camel case vs.
