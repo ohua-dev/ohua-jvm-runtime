@@ -7,11 +7,9 @@
 package ohua.runtime.engine.operators;
 
 import java.util.Collections;
-import java.util.logging.Logger;
 
 import ohua.runtime.engine.daapi.InputPortControl;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
-import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public class ConsumerOperator extends UserOperator
 {
@@ -55,8 +53,7 @@ public class ConsumerOperator extends UserOperator
   }
   
   @Override public void cleanup() {
-    Logger.getLogger(getClass().getCanonicalName() + "-result").info("Operator \"" + getOperatorName() + "\" has seen "
-                                                             + _seenPackets + " packets.");
+    // nothing
   }
     
   public Object getState() {

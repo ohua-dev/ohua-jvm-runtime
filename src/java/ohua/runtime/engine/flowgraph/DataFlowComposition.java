@@ -30,7 +30,7 @@ public abstract class DataFlowComposition implements Supplier<DataFlowProcess>
     String operatorName = operatorType;
     IOperatorFactory opFactory = operatorFactory();
     if(!opFactory.exists(operatorName)) {
-      operatorName = convertOperatorName(operatorName);
+      throw new OperatorLoadingException("Not linked: '" + operatorName + "'");
     }
     return opFactory.createUserOperatorCore(graph, operatorName);
   }
@@ -55,15 +55,4 @@ public abstract class DataFlowComposition implements Supplier<DataFlowProcess>
     }
   }
 
-  /**
-   * Called whenever an operator with such a name does not exist. The according subclass can use
-   * this as a hook for example to convert between different naming conventions (camel case vs.
-   * underscore).
-   * @param operatorName
-   * @return
-   */
-  protected String convertOperatorName(String operatorName) {
-    return operatorName;
-  }
-  
 }

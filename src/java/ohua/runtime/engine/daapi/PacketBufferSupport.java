@@ -8,22 +8,18 @@ package ohua.runtime.engine.daapi;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import ohua.runtime.engine.exceptions.Assertion;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorStateAccess;
 import ohua.runtime.engine.flowgraph.elements.operator.PortID;
-import ohua.runtime.engine.utils.OhuaLoggerFactory;
 
 public class PacketBufferSupport implements OperatorStateAccess, PacketBuffer, PacketCursor
 {
   @SuppressWarnings("unused")
   private PortID _port = null;
   
-  private List<DataPacket> _buffer = new ArrayList<DataPacket>();
+  private List<DataPacket> _buffer = new ArrayList<>();
   private PacketReplay _replayer = null;
-  
-  private Logger _logger = OhuaLoggerFactory.getLogger(getClass());
   
   protected PacketBufferSupport(PortID port) {
     _port = port;
@@ -48,7 +44,7 @@ public class PacketBufferSupport implements OperatorStateAccess, PacketBuffer, P
     
   public void buffer() {
     // nothing here because the item is already buffered
-    _logger.warning("Request for buffering during replay of already buffered packets! Your operator algorithm might be wrong.");
+    System.out.println("WARNING: Request for buffering during replay of already buffered packets! Your operator algorithm might be wrong.");
   }
   
   public void buffer(DataPacket packet) {

@@ -7,31 +7,17 @@ package ohua.runtime.lang.operator;
 
 import java.util.ArrayList;
 
-import ohua.runtime.engine.exceptions.OperatorLoadingException;
-import ohua.runtime.engine.utils.parser.OperatorDescription;
-import ohua.runtime.engine.utils.parser.OperatorDescriptorDeserializer;
+import ohua.runtime.engine.operators.IOperatorDescriptionProvider;
+import ohua.runtime.engine.operators.OperatorDescription;
 
-public class SFNDeserializer extends OperatorDescriptorDeserializer
-{
+public class SFNDeserializer implements IOperatorDescriptionProvider {
   
-  public OperatorDescription deserialize(String operatorImplName) throws OperatorLoadingException {
-//    try {
-//      if(AbstractFunctionalOperator.class.isAssignableFrom(Class.forName(operatorImplName))) {
-        // the design of this operator is done else where. it is specified in the function
-        // signature and return types of the operator.
+  public OperatorDescription apply(String operatorImplName) {
         OperatorDescription desc = new OperatorDescription();
         desc.setInputPorts(new ArrayList<>());
         desc.setDyanmicInputPorts(true);
         desc.setOutputPorts(new ArrayList<>());
         desc.setDynamicOutputPorts(true);
         return desc;
-//      }
-//      else {
-//        return super.deserialize(operatorImplName);
-//      }
-//    }
-//    catch(ClassNotFoundException e) {
-//      throw new OperatorLoadingException(e);
-//    }
   }
 }

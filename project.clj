@@ -36,13 +36,11 @@
                         :dependencies            [
                                                   ; libs needed for testing
                                                   [junit/junit "4.12"]
-                                                  [commons-io/commons-io "2.4"]
+                                                  ;[commons-io/commons-io "2.4"]
                                                   
                                                   [org.scala-lang/scala-library "2.11.8"] ; Necessary to use scala stdlib
                                                   [org.scala-lang/scala-compiler "2.10.1"] ; I'm not actually sure its necessary, I think I'm just using my
                                                                                            ; systems scala compiler right now but I left it in here as a reminder
-                                                  [org.codehaus.woodstox/woodstox-core-asl "4.4.1"]
-                                                  [org.codehaus.castor/castor-xml "1.3.3"]
                                                   ]
 
                         ; paths for Clojure test cases
@@ -58,9 +56,7 @@
 
                         :java-source-paths       ["test/java"]
                         ;:scala-source-path       "com.ohua.lang/test/scala" Source path definition for the leinigen plugin, which is broken
-                        :jvm-opts                ["-ea"
-                                                  "-Djava.util.logging.config.file=./com.ohua.engine/config/consoleLogging-off.properties"
-                                                  "-Djava.library.path=/usr/local/lib:${env_var:PATH}"]
+                        :jvm-opts                ["-ea"]
                         ;:prep-tasks ["scalac"] Doesn't work -.-
                         }}
 

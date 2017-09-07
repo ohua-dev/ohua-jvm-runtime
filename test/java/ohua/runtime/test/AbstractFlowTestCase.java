@@ -21,7 +21,6 @@ import ohua.runtime.engine.ProcessID.ProcessIDGenerator;
 import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.flowgraph.elements.operator.AbstractPort.PortState;
 import ohua.runtime.engine.flowgraph.elements.operator.AbstractOperatorStateMachine.OperatorState;
-import ohua.runtime.engine.utils.GraphVisualizer;
 
 import java.util.function.Supplier;
 
@@ -45,38 +44,12 @@ public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
     ProcessIDGenerator.resetIDCounter();
   }
 
-  @Deprecated
-  protected ProcessRunner createProcessRunner(String pathToFlow) {
-    return new ProcessRunner(pathToFlow);
-  }
-
   protected ProcessRunner createProcessRunner(Supplier<DataFlowProcess> process) {
     return new ProcessRunner(process);
   }
 
   protected ProcessRunner createProcessRunner(Supplier<DataFlowProcess> process, RuntimeProcessConfiguration config) {
     return new ProcessRunner(process, config);
-  }
-
-  @Deprecated
-  public final AbstractProcessManager loadProcess(String pathToFlow) throws Throwable
-  {
-    ProcessRunner runner = createProcessRunner(pathToFlow);
-    AbstractProcessManager processManager = runner.getProcessManager();
-    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
-    GraphVisualizer.printFlowGraph(processManager.getProcess().getGraph());
-    return processManager;
-  }
-
-  @Deprecated
-  public final AbstractProcessManager loadProcess(String pathToFlow,
-                                                  String pathToRuntimeProperties) throws Throwable {
-    ProcessRunner runner = createProcessRunner(pathToFlow);
-    runner.loadRuntimeConfiguration(pathToRuntimeProperties);
-    AbstractProcessManager processManager = runner.getProcessManager();
-//    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
-//    GraphVisualizer.printFlowGraph(processManager.getProcess().getGraph());
-    return processManager;
   }
 
   public final AbstractProcessManager loadProcess(FlowGraph graph) throws Throwable
@@ -131,13 +104,6 @@ public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
       }
     }
     
-  }
-
-  public final FlowGraph runFlowGetGraph(String pathToFlow, String pathToRuntimeProperties) throws Throwable
-  {
-    AbstractProcessManager manager = loadProcess(pathToFlow, pathToRuntimeProperties);
-    runFlowNoAssert(manager);
-    return manager.getProcess().getGraph();
   }
 
   protected void performDataPhaseAssertions(AbstractProcessManager manager)

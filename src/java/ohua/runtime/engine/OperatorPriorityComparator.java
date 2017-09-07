@@ -7,15 +7,10 @@
 package ohua.runtime.engine;
 
 import java.util.Comparator;
-import java.util.logging.Logger;
-
 import ohua.runtime.engine.flowgraph.elements.operator.NotificationBasedOperatorRuntime;
-import ohua.runtime.engine.utils.OhuaLoggerFactory;
 
 public class OperatorPriorityComparator implements Comparator<NotificationBasedOperatorRuntime>
 {
-  private Logger _logger = OhuaLoggerFactory.getLogger(getClass());
-  
   public int compare(NotificationBasedOperatorRuntime op1, NotificationBasedOperatorRuntime op2) {
     int result;
     

@@ -6,15 +6,12 @@
 
 package ohua.runtime.engine.operators;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 import ohua.runtime.engine.daapi.OutputPortControl;
-import ohua.runtime.engine.flowgraph.elements.operator.Operator;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
-import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public class GeneratorOperator extends UserOperator
 {

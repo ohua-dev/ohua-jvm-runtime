@@ -24,7 +24,7 @@ public class testNestedIfStatement extends AbstractRegressionTestCase {
       loadCoreOps();
   }
 
-    @Ignore // We dont have `merge` right now
+    @Ignore // FIXME We dont have `merge` right now
   @Test(timeout = 30000)
   public void testConditionMerge() throws Throwable {
     GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";

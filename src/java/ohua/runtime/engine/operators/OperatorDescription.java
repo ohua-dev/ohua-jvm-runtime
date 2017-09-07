@@ -4,11 +4,9 @@
  * This source code is licensed under the terms described in the associated LICENSE.TXT file.
  */
 
-package ohua.runtime.engine.utils.parser;
+package ohua.runtime.engine.operators;
 
 import java.util.List;
-
-import org.exolab.castor.mapping.Mapping;
 
 import ohua.runtime.engine.flowgraph.elements.operator.InputPort;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
@@ -22,9 +20,6 @@ public class OperatorDescription implements Cloneable
   private boolean _dynamicInputPorts = false;
   private boolean _dynamicOutputPorts = false;
 
-//  private Mapping _propertiesMapping = null;
-  private Class<?> _properties = null;
-  
   public void apply(OperatorCore operator, boolean isUserOperator)
   {
     for(String inputPort : _inputPorts)
@@ -60,16 +55,6 @@ public class OperatorDescription implements Cloneable
     _outputPorts = outputPorts;
   }
 
-//  public Mapping getPropertiesMapping()
-//  {
-//    return _propertiesMapping;
-//  }
-//
-//  public void setPropertiesMapping(Mapping propertiesMapping)
-//  {
-//    _propertiesMapping = propertiesMapping;
-//  }
-    
   public void setDyanmicInputPorts(boolean dynamic)
   {
     _dynamicInputPorts = dynamic;

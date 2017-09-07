@@ -9,13 +9,12 @@ package ohua.runtime.engine.operators.system;
 import java.util.Collections;
 import java.util.LinkedList;
 
-import ohua.runtime.engine.exceptions.InvariantBroken;
 import ohua.runtime.engine.flowgraph.elements.operator.OutputPort;
 import ohua.runtime.engine.flowgraph.elements.operator.SystemOperator;
 import ohua.runtime.engine.flowgraph.elements.packets.ActivationMarker;
 import ohua.runtime.engine.flowgraph.elements.packets.EndOfStreamPacket;
 import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
-import ohua.runtime.engine.utils.parser.OperatorDescription;
+import ohua.runtime.engine.operators.OperatorDescription;
 
 public class ProcessControlOperator extends SystemOperator
 {

@@ -6,18 +6,13 @@
 package ohua.runtime.lang;
 
 import ohua.runtime.lang.operator.SFNLinker;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorLibrary;
 import ohua.runtime.engine.utils.FileUtils;
 import ohua.lang.defsfn;
-import ohua.runtime.exceptions.CompilationException;
-import ohua.runtime.exceptions.CompilationException.CAUSE;
 
-import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -33,22 +28,7 @@ public abstract class JavaSFNLinker {
     SFNLinker.getInstance();
     load("ohua.lang", true);
   }
-  
-  /**
-   * Loads all additional registries and adds the loaded operators to the library.
-   * @param libs
-   * @throws Exception
-   * @throws FileNotFoundException
-   */
-  public static void loadAppOperators(String... libs) throws Exception {
-    for(String opLib : libs) {
-      Map<String, String> ops = OperatorLibrary.loadLibrary(opLib);
-      for(Map.Entry<String, String> op : ops.entrySet()) {
-        SFNLinker.getInstance().registerUserOperator(op.getKey(), op.getValue());
-      }
-    }
-  }
-  
+
   public static Set<String> list() {
     Set<String> linked = new HashSet<>();
     SFNLinker.getInstance().getRegisteredUserOperators();

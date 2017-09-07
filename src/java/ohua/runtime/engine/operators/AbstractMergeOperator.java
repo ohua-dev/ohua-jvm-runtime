@@ -11,7 +11,6 @@ import ohua.runtime.engine.daapi.InputPortControl;
 import ohua.runtime.engine.daapi.OutputPortControl;
 import ohua.runtime.engine.exceptions.Assertion;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
-import ohua.runtime.engine.utils.parser.OperatorDescription;
 
 public abstract class AbstractMergeOperator extends UserOperator
 {

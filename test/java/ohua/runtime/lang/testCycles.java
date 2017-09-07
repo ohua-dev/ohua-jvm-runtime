@@ -8,7 +8,6 @@ package ohua.runtime.lang;
 import ohua.link.JavaBackendProvider;
 import ohua.runtime.engine.flowgraph.elements.operator.Arc.ArcType;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorLibrary;
 import ohua.runtime.engine.utils.GraphVisualizer;
 import ohua.lang.Condition;
 import ohua.runtime.test.AbstractFlowTestCase;
@@ -98,9 +97,11 @@ public class testCycles extends AbstractFlowTestCase
     ops.put("func-prod", testFunctionalOperator.FunctionalGenericProducer.class.getName());
     ops.put("inc", RawIncOperator.class.getName());
     ops.put("func-cons", testFunctionalOperator.IntConsumer.class.getName());
-    OperatorLibrary.registerOperators(ops, getTestMethodOutputDirectory() + "test-registry.xml");
+    // FIXME
+//    OperatorLibrary.registerOperators(ops, getTestMethodOutputDirectory() + "test-registry.xml");
     JavaSFNLinker.loadCoreOperators();
-    JavaSFNLinker.loadAppOperators(getTestMethodOutputDirectory() + "test-registry.xml");
+    // FIXME
+//    JavaSFNLinker.loadAppOperators(getTestMethodOutputDirectory() + "test-registry.xml");
     GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "flow-graph";
 
         OhuaRuntime runtime = new OhuaRuntime();

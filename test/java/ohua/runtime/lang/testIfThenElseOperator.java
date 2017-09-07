@@ -38,7 +38,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
    */
   @Test(timeout = 30000)
   public void testBasicIf() throws Throwable {
-    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
+//    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
     clearCache();
     registerFunc("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
     registerFunc("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
@@ -46,7 +46,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-prod", 100);
-    runtime.createOperator("com.ohua.lang/ifThenElse", 102);
+    runtime.createOperator("ohua.lang/ifThenElse", 102);
     createOp(runtime, "func-cons", 104);
     createOp(runtime, "func-cons", 105);
 
@@ -85,7 +85,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
   
   @Test(timeout = 30000)
   public void testBasicElse() throws Throwable {
-    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
+//    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
     clearCache();
     registerFunc("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
     registerFunc("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
@@ -93,7 +93,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-prod", 100);
-    runtime.createOperator("com.ohua.lang/ifThenElse", 102);
+    runtime.createOperator("ohua.lang/ifThenElse", 102);
     createOp(runtime, "func-cons", 104);
     createOp(runtime, "func-cons", 105);
 
@@ -144,7 +144,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-prod", 100);
-    runtime.createOperator("com.ohua.lang/ifThenElse", 102);
+    runtime.createOperator("ohua.lang/ifThenElse", 102);
     createOp(runtime, "func-cons", 104);
     createOp(runtime, "func-cons", 105);
 
@@ -192,7 +192,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
   }
   
   @Test(timeout = 30000)
-  @Ignore // We dont have `merge` anymore
+  @Ignore // FIXME We dont have `merge` anymore
   public void testWithConsume() throws Throwable {
     clearCache();
     loadCoreOps();
@@ -200,7 +200,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
     registerFunc("add", ClojureTestOps.AddOperator.class.getDeclaredMethod("add", int.class, long.class));
     registerFunc("subtract", ClojureTestOps.SubtractOperator.class.getDeclaredMethod("subtract", int.class, long.class));
 
-    JavaBackendProvider.registerFunction("com.ohua.tests.lang", "collect", ClojureTestOps.TestCollectOperator.class.getDeclaredMethod("collect", long.class, long[].class));
+    JavaBackendProvider.registerFunction("ohua.tests.lang", "collect", ClojureTestOps.TestCollectOperator.class.getDeclaredMethod("collect", long.class, long[].class));
 
     OhuaRuntime runtime = new OhuaRuntime
             ();
@@ -242,7 +242,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
   
   @Test(timeout=30000)
   public void testTwoConditionInputs() throws Throwable {
-    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
+//    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
     clearCache();
     loadCoreOps();
     registerFunc("produce", ClojureTestOps.TestProduceOperator.class.getDeclaredMethod("produce"));
@@ -252,7 +252,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
         "(doto (new ohua.runtime.lang.OhuaRuntime)"
                 + "(.createOperator \"" + testNS + "/produce\" 100)"
                 + "(.createOperator \"" + testNS + "/produce\" 101)"
-                + "(.createOperator \"com.ohua.lang/ifThenElse\" 103)"
+                + "(.createOperator \"ohua.lang/ifThenElse\" 103)"
                 + "(.createOperator \"" + testNS + "/consume\" 105)"
                 + "(.createOperator \"" + testNS + "/consume\" 106)"
             + "(.registerDependency 100 -1 103 1)"

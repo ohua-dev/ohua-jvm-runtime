@@ -21,7 +21,7 @@ public class testExceptions extends AbstractFlowTestCase {
   public void testRuntimeExceptionInFunction() throws Throwable {
     registerFunc("func-prod", testIfThenElseOperator.MultiProducer.class.getDeclaredMethod("produce", List.class));
     registerFunc("fail", Failure.class.getDeclaredMethod("fail", String.class));
-    JavaBackendProvider.loadCoreOperators();
+    loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
     runtime.createOperator(testNS + "/func-prod", 100);

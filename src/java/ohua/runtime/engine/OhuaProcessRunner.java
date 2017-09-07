@@ -43,10 +43,7 @@ import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
  * @author sertel
  * 
  */
-// TODO make this thing a state machine and handle invalid transitions (INITIALIZE ->
-// INITIALIZE)
-// FIXME make final again after testing is done!
-public class OhuaProcessRunner extends AbstractProcessRunner {
+public final class OhuaProcessRunner extends AbstractProcessRunner {
   
   protected class Waiter implements Runnable {
     public void run() {
@@ -67,10 +64,6 @@ public class OhuaProcessRunner extends AbstractProcessRunner {
    * Listeners are being notified for main events; not for FLOW_INPUT.
    */
   private List<OhuaProcessListener> _listeners = new LinkedList<OhuaProcessListener>();
-  
-  public OhuaProcessRunner(String pathToFlow) {
-    super(pathToFlow);
-  }
   
   public OhuaProcessRunner(DataFlowComposition loader) {
     super(loader);

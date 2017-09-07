@@ -10,8 +10,8 @@ import ohua.runtime.engine.RuntimeProcessConfiguration;
 import ohua.runtime.engine.exceptions.Assertion;
 import ohua.runtime.engine.exceptions.OperatorLoadingException;
 import ohua.runtime.engine.flowgraph.elements.FlowGraph;
-import ohua.runtime.engine.utils.parser.OperatorDescription;
-import ohua.runtime.engine.utils.parser.OperatorDescriptorDeserializer;
+import ohua.runtime.engine.operators.IOperatorDescriptionProvider;
+import ohua.runtime.engine.operators.OperatorDescription;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class OperatorFactory implements IOperatorFactory
   private static Map<String, String> _systemOperatorRegistry = new HashMap<>();
   private static OperatorFactory _factory = new OperatorFactory();
   private Map<String, OperatorDescription> _operatorDescriptors = new HashMap<>();
-  private OperatorDescriptorDeserializer _descriptorDeserializer = new OperatorDescriptorDeserializer();
+  private IOperatorDescriptionProvider _descriptorProvider = null;
   private boolean _applyDescriptorForUserOperators = true;
 
   private OperatorFactory() {
@@ -34,10 +34,6 @@ public class OperatorFactory implements IOperatorFactory
 
   public static OperatorFactory getInstance() {
     return _factory;
-  }
-
-  public static OperatorDescription getOperatorDescription(OperatorCore operator) {
-    return getInstance().getOperatorDescription(operator.getOperatorType());
   }
 
   public void setApplyDescriptorsForUserOperators(boolean apply) {
@@ -163,7 +159,6 @@ public class OperatorFactory implements IOperatorFactory
     _userOperatorRegistry.put(operatorName, clz.getName());
   }
 
-  // FIXME redo this!
   private OperatorDescription loadOperatorDescriptor(String operatorName, boolean isUserOperator) throws OperatorLoadingException {
     if(_operatorDescriptors.containsKey(operatorName)) {
       return _operatorDescriptors.get(operatorName);
@@ -184,13 +179,9 @@ public class OperatorFactory implements IOperatorFactory
       }
     }
 
-    OperatorDescription opDescriptor = _descriptorDeserializer.deserialize(operatorImplName);
+    OperatorDescription opDescriptor = _descriptorProvider.apply(operatorImplName);
     _operatorDescriptors.put(operatorName, opDescriptor);
     return opDescriptor;
-  }
-
-  public OperatorDescription getOperatorDescription(String operatorName) {
-    return _operatorDescriptors.get(operatorName);
   }
 
   public UserOperator createUserOperator(FlowGraph graph, String operatorType, String displayName) throws OperatorLoadingException {
@@ -211,8 +202,8 @@ public class OperatorFactory implements IOperatorFactory
     return core;
   }
 
-  public void setOperatorDescriptorDeserializer(OperatorDescriptorDeserializer descriptorDeserializer) {
-    _descriptorDeserializer = descriptorDeserializer;
+  public void setOperatorDescriptorDeserializer(IOperatorDescriptionProvider descriptorProvider) {
+    _descriptorProvider = descriptorProvider;
   }
 
   public boolean registerUserOperator(String alias, String implReference) {

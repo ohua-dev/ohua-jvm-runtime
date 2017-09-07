@@ -147,7 +147,7 @@ public class InputPort extends AbstractPort implements GraphNodeInput {
       case NOT_MY_BUISNESS:
         // some listener has to handle this packet!!!
         // TODO turn into an exception!
-        if (RuntimeProcessConfiguration.LOGGING_ENABLED) _logger.severe("Unhandled packet detected: "
+        if (RuntimeProcessConfiguration.LOGGING_ENABLED) System.out.println("SEVERE: Unhandled packet detected: "
                 + currentPacketToBeReturned
                 + " in operator "
                 + getOwner().getOperatorName()
@@ -186,26 +186,10 @@ public class InputPort extends AbstractPort implements GraphNodeInput {
   }
 
   public void setHasSeenLastPacket(boolean lastPacketReceived) {
-    if (RuntimeProcessConfiguration.LOGGING_ENABLED) {
-      _logger.info(getPortName() + " received last packet! -> " + lastPacketReceived);
-    }
     _lastPacketReceived = lastPacketReceived;
   }
 
-//  public Object getCurrentPacketToBeReturned() {
-//    return _currentPacketToBeReturned;
-//  }
-
-//  public void setCurrentPacketToBeReturned(Maybe<Object> currentPacketToBeReturned) {
-//    _currentPacketToBeReturned = currentPacketToBeReturned;
-//  }
-
   public void registerPacketVisitor(VisitorMixin<? extends IPacket, ? extends IPacketHandler> visitor) {
-    if (RuntimeProcessConfiguration.LOGGING_ENABLED) {
-      _logger.log(Level.ALL,
-              "registered visitor " + visitor.getClass().getSimpleName() + " on input port " + getPortId());
-    }
-
     _packetVisitors[visitor.getEventResponsibility().ordinal()] = visitor;
   }
 
@@ -345,9 +329,6 @@ public class InputPort extends AbstractPort implements GraphNodeInput {
   @Override
   protected void setState(PortState state) {
     super.setState(state);
-    if (RuntimeProcessConfiguration.LOGGING_ENABLED) {
-      _logger.info(getOwner().getID() + "->" + toString() + ": Input Port set to state: " + state);
-    }
   }
 
   public void setComplimentaryInput() {

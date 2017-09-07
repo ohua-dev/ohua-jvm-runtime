@@ -218,17 +218,6 @@ public abstract class OhuaFrontend extends DataFlowComposition {
     return _process;
   }
 
-  /**
-   * Ohua operator names (ids) currently start with an upper case letter and use camel case.
-   */
-  protected String convertOperatorName(String operatorName) {
-    String converted = Linker.convertFunctionName(operatorName);
-    // FIXME this is not true anymore! the name of the operator does not matter anymore. the
-    // conversion here happens on the name of the function tagged with @Algorithm! therefore,
-    // the first letter should not be upper case!
-    return String.valueOf(converted.charAt(0)).toUpperCase() + converted.substring(1);
-  }
-
   public CompileTimeView getCompileTimeView() {
     final CompileTimeInfo compileInfo = _compileInfo;
     return new CompileTimeView() {

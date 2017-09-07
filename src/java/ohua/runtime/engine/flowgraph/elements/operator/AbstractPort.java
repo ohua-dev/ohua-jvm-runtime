@@ -6,11 +6,8 @@
 
 package ohua.runtime.engine.flowgraph.elements.operator;
 
-import java.util.logging.Logger;
-
 import ohua.runtime.engine.exceptions.Assertion;
 import ohua.runtime.engine.flowgraph.elements.operator.PortID.PortIDGenerator;
-import ohua.runtime.engine.utils.OhuaLoggerFactory;
 
 public abstract class AbstractPort
 {
@@ -25,8 +22,6 @@ public abstract class AbstractPort
   }
   
   private OperatorCore _owner = null;
-  
-  protected Logger _logger = OhuaLoggerFactory.getLogger(getClass());
   
   private PortID _portId = null;
   

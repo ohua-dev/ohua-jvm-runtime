@@ -9,14 +9,8 @@ package ohua.runtime.engine;
 import java.io.IOException;
 import java.util.function.Supplier;
 
-import ohua.runtime.engine.flowgraph.DataFlowComposition;
-
 public final class ProcessRunner extends AbstractProcessRunner {
 
-  public ProcessRunner(String pathToFlow) {
-    super(pathToFlow);
-  }
-  
   public ProcessRunner(AbstractProcessManager manager) {
     super(manager);
   }
@@ -35,9 +29,7 @@ public final class ProcessRunner extends AbstractProcessRunner {
   {
     super.loadRuntimeConfiguration(pathToRuntimeConfiguration);
   }
-  
-  // FIXME this is a leak. we should never give the process manager away. (at least not to the
-  // program executing the flow.)
+
   public AbstractProcessManager getProcessManager() {
     if(_manager == null) {
       initializeProcessManager();

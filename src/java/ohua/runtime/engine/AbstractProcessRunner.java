@@ -7,16 +7,10 @@
 package ohua.runtime.engine;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.function.Supplier;
-
-import ohua.runtime.engine.flowgraph.DataFlowComposition;
-import ohua.runtime.engine.flowgraph.elements.AbstractUniqueID;
-import ohua.runtime.engine.flowgraph.elements.FlowGraph;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorID;
-import ohua.runtime.engine.utils.parser.OhuaFlowParser;
-import ohua.runtime.engine.utils.parser.ProcessConfigurationLoader;
 
 public abstract class AbstractProcessRunner implements Runnable
 {
@@ -27,12 +21,6 @@ public abstract class AbstractProcessRunner implements Runnable
 
   public AbstractProcessRunner(AbstractProcessManager manager){
     _manager = manager;
-  }
-
-  @Deprecated
-  public AbstractProcessRunner(String pathToFlow)
-  {
-    _parser = new OhuaFlowParser(pathToFlow);
   }
 
   public AbstractProcessRunner(Supplier<DataFlowProcess> loader)
@@ -47,7 +35,7 @@ public abstract class AbstractProcessRunner implements Runnable
 
   public void loadRuntimeConfiguration(String pathToRuntimeConfiguration) throws IOException,
                                                                                   ClassNotFoundException {
-    _config = ProcessConfigurationLoader.load(new File(pathToRuntimeConfiguration));
+    _config = load(new File(pathToRuntimeConfiguration));
   }
 
   public void addProperty(String key, Object value){
@@ -66,4 +54,36 @@ public abstract class AbstractProcessRunner implements Runnable
   
   abstract protected void initialize();
 
+  private RuntimeProcessConfiguration load(File processConfiguration) throws IOException,
+          ClassNotFoundException {
+    Properties properties = new Properties();
+    FileReader reader = new FileReader(processConfiguration);
+    properties.load(reader);
+    reader.close();
+
+    String name =
+            properties.getProperty("runtime-properties-class",
+                    "ohua.runtime.engine.RuntimeProcessConfiguration");
+    Object runtimeProperties = null;
+    try
+    {
+      runtimeProperties = Class.forName(name).newInstance();
+    }
+    catch(IllegalAccessException | InstantiationException e)
+    {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+
+    if(runtimeProperties instanceof RuntimeProcessConfiguration)
+    {
+      ((RuntimeProcessConfiguration) runtimeProperties).setProperties(properties);
+    }
+    else
+    {
+      throw new RuntimeException("Unknown runtime properties class.");
+    }
+
+    return (RuntimeProcessConfiguration) runtimeProperties;
+  }
 }
