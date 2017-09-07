@@ -28,6 +28,7 @@
                                                   [org.scala-lang/scala-library "2.11.8"] ; Necessary to use scala stdlib
                                                   [org.scala-lang/scala-compiler "2.10.1"] ; I'm not actually sure its necessary, I think I'm just using my
                                                                                            ; systems scala compiler right now but I left it in here as a reminder
+                                                  [rhizome "0.2.5"]
                                                   ]
 
                         ; paths for Clojure test cases
