@@ -145,7 +145,7 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
    */
   @Test(timeout = 20000)
   public void testExplicitSchemaMatchOne() throws Throwable {
-    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
+//    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
 
     clearCache();
     registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
@@ -178,8 +178,6 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
    */
   @Test(timeout = 20000)
   public void testExplicitSchemaMatchTwo() throws Throwable {
-    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
-
     clearCache();
     registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
     registerFunc("int-cons", IntConsumer.class.getDeclaredMethod("consume", int.class, ResultCapture.class));

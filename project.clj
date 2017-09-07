@@ -14,19 +14,7 @@
             ; plugin needed for META-INF handling
             [lein-javac-resources "0.1.1"]]
 
-  :dependencies [;[org.clojure/clojure "1.8.0"]
-                 ; Compiler libraries
-                 ;[org.ow2.asm/asm-all "5.0.3"]
-                 ;[org.codehaus.janino/janino "2.7.6"]
-                 ;[aua "0.1.3"]
-                 ;[transactified "0.1"]
-                 ;[org.clojure/algo.monads "0.1.6"]
-                 ;[bwo/monads "0.2.2"]
-                 ;[rhizome "0.2.5"]
-
-                 ; Runtime/engine libraries
-
-                 ; code generation
+  :dependencies [; code generation
                  [org.codehaus.janino/janino "3.0.6"]]
 
   :profiles {:provided {:dependencies [[org.clojure/clojure "1.8.0"]]}
@@ -36,8 +24,7 @@
                         :dependencies            [
                                                   ; libs needed for testing
                                                   [junit/junit "4.12"]
-                                                  ;[commons-io/commons-io "2.4"]
-                                                  
+
                                                   [org.scala-lang/scala-library "2.11.8"] ; Necessary to use scala stdlib
                                                   [org.scala-lang/scala-compiler "2.10.1"] ; I'm not actually sure its necessary, I think I'm just using my
                                                                                            ; systems scala compiler right now but I left it in here as a reminder
@@ -70,7 +57,6 @@
              ;"-XX:ParallelGCThreads=2"
              "-Xmx2g"] ; there is no need for more than that during development (some tests run on quite a lot of data)
 
-  ; this apparently does not work and hence those testUpdates runs out of memory
   ; I'm not sure anymore whether it is a good idea to rely on lein-junit further as it depends on lancet which is dead.
   :junit-options {:fork "on"
                   ;:forkMode "perTest"
