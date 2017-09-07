@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 /**
  * Created by justusadam on 01/12/2016.
  */
+@Deprecated // I believe that this is a ClojureSFNProvider only
 public final class JavaBackendProvider {
     private static final IFn require = Clojure.var("clojure.core", "require");
     private static final IFn getBackend_;

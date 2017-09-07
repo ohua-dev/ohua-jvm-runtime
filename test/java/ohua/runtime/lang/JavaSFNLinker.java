@@ -5,8 +5,7 @@
  */
 package ohua.runtime.lang;
 
-import ohua.runtime.lang.operator.FunctionalOperatorFactory;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
+import ohua.runtime.lang.operator.SFNLinker;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorLibrary;
 import ohua.runtime.engine.utils.FileUtils;
 import ohua.lang.defsfn;
@@ -22,18 +21,17 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The linker part of the compiler. It is directly called from the Clojure macro and loads all
- * referenced operators into the operator registry.
+ * The linker part that loads Java SFNs into the registry.
  * @author sertel
  * 
  */
-@Deprecated
-public abstract class Linker {
+public abstract class JavaSFNLinker {
   /**
    * Loads all operators located inside the Ohua jar used.
    */
   public static void loadCoreOperators() {
-    FunctionalOperatorFactory.getInstance();
+    SFNLinker.getInstance();
+    load("ohua.lang", true);
   }
   
   /**
@@ -46,62 +44,28 @@ public abstract class Linker {
     for(String opLib : libs) {
       Map<String, String> ops = OperatorLibrary.loadLibrary(opLib);
       for(Map.Entry<String, String> op : ops.entrySet()) {
-        FunctionalOperatorFactory.getInstance().registerUserOperator(op.getKey(), op.getValue());
+        SFNLinker.getInstance().registerUserOperator(op.getKey(), op.getValue());
       }
     }
   }
   
   public static Set<String> list() {
     Set<String> linked = new HashSet<>();
-    FunctionalOperatorFactory.getInstance().getRegisteredUserOperators();
-    linked.addAll(FunctionalOperatorFactory.getInstance().getRegisteredUserOperators());
+    SFNLinker.getInstance().getRegisteredUserOperators();
+    linked.addAll(SFNLinker.getInstance().getRegisteredUserOperators());
     return linked;
   }
-  
-  /**
-   * Loads all additional operators/functions from a package and adds them to the library.
-   * @param packageName
-   * @throws Exception
-   * @throws FileNotFoundException
-   */
 
-  public static void reload(final String packageName) {
-    load(packageName, true);
-  }
-  
-  public static Object resolve(final String sfRef) throws Exception {
-//    if(isOperator(sfRef)) {
-//      return loadFunction(sfRef);
-//    } else {
-//      String convertedRef = convertFunctionName(sfRef);
-//      if(isOperator(convertedRef)) {
-//        return loadFunction(convertedRef);
-//      } else {
-        throw new CompilationException(CAUSE.NO_METHOD_FOUND, sfRef);
-//      }
-//    }
+
+  public static void registerFunction(String ns, String name, Method handle) {
+    SFNLinker opFactory = SFNLinker.getInstance();
+    opFactory.registerUserOperator(ns + "/" + name, handle.getDeclaringClass().getName(), true);
   }
 
-//  private static Object loadFunction(final String sfRef) throws Exception {
-//    String sourceRef = FunctionalOperatorFactory.getInstance().getSourceCodeReference(sfRef);
-//    return ReflectionUtils.createDefault(Class.forName(sourceRef));
-//  }
-
-  public static String convertFunctionName(String functionRef) {
-    StringBuffer converted = new StringBuffer(functionRef);
-    int idx = -1;
-    while((idx = converted.indexOf("-")) > -1) {
-      converted.deleteCharAt(idx);
-      converted.replace(idx, idx + 1, String.valueOf(converted.charAt(idx)).toUpperCase());
-    }
-    return converted.toString();
-  }
-  
   private static void load(final String packageName, boolean reload) {
     String javaPackageName = packageName.replace("-", "_");
     List<Path> paths = FileUtils.loadFromClasspath(javaPackageName.replace(".", "/"), "*.class");
-//    OperatorFactory.registryFilter = "{Ohua,Language}*Registry.xml";
-    FunctionalOperatorFactory opFactory = FunctionalOperatorFactory.getInstance();
+    SFNLinker opFactory = SFNLinker.getInstance();
     for(Path path : paths) {
       String className = path.getFileName().toString().replaceAll(".class$", "");
       try {
@@ -115,7 +79,7 @@ public abstract class Linker {
   }
   
   private static void checkAndRegister(final String packageName, final Class<?> cls, final String className,
-                                       FunctionalOperatorFactory opFactory, boolean reload)
+                                       SFNLinker opFactory, boolean reload)
   {
     String methodName = null;
     for(Method method : cls.getDeclaredMethods()) {
@@ -131,14 +95,14 @@ public abstract class Linker {
 
     if(methodName != null) {
       String javaPackageName = packageName.replace("-", "_");
-      // Java name
-      opFactory.registerUserOperator(methodName, javaPackageName + "." + className, reload);
-      // Clojure name
-      String clojureName = convertToClojureName(methodName);
-      opFactory.registerUserOperator(clojureName, javaPackageName + "." + className, reload);
+//      // Java name
+//      opFactory.registerUserOperator(methodName, javaPackageName + "." + className, reload);
+//      // Clojure name
+//      String clojureName = convertToClojureName(methodName);
+//      opFactory.registerUserOperator(clojureName, javaPackageName + "." + className, reload);
       // add a namespace-qualified mapping.
       // TODO: this should be the only mapping for this methodName! see issue #101
-      opFactory.registerUserOperator(packageName + "/" + clojureName, javaPackageName + "." + className, reload);
+      opFactory.registerUserOperator(packageName + "/" + methodName, javaPackageName + "." + className, reload);
     }
   }
   
@@ -157,7 +121,7 @@ public abstract class Linker {
   }
 
   public static void clear() {
-    FunctionalOperatorFactory.getInstance().clear();
+    SFNLinker.getInstance().clear();
   }
 
 }

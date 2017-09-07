@@ -76,50 +76,52 @@ public class PreparedRuntimeConfiguration extends RuntimeProcessConfiguration im
     private int lastOpId = -1;
     private int opCounter = 0;
     private static int MIN_PRIORITY = -2;
-    private static final IFn require = Clojure.var("clojure.core/require");
-    private static final IFn spit = Clojure.var("clojure.core", "spit");
-    private static final IFn renderfn;
+//    private static final IFn require = Clojure.var("clojure.core/require");
+//    private static final IFn spit = Clojure.var("clojure.core", "spit");
+//    private static final IFn renderfn;
     private int graphDumpSeqNum = 0;
     private boolean wasUnsuccessful = false;
     private static final boolean REPORT_FAILURE = false;
 
 
-    static {
-      require.invoke(Clojure.read("[ohua.util.visual]"));
-      renderfn = Clojure.var("ohua.util.visual", "render-runtime-graph");
-    }
+    // TODO I do understand that it is good to have such a thing here but having the Clojure dependency always in the engine/scheduler is not so cool.
+    // FIXME duplicate code: TaskScheduler
+//    static {
+//      require.invoke(Clojure.read("[ohua.util.visual]"));
+//      renderfn = Clojure.var("ohua.util.visual", "render-runtime-graph");
+//    }
 
     private void dumpGraph(Set graph, int chosen, String filename) {
-      if (graph == null) throw new RuntimeException("No graph!");
-      renderfn.invoke(graph, chosen, filename);
+//      if (graph == null) throw new RuntimeException("No graph!");
+//      renderfn.invoke(graph, chosen, filename);
     }
 
     private void dumpGraph(Set graph, String filename) {
-      if (graph == null) throw new RuntimeException("No graph!");
-      renderfn.invoke(graph, filename);
+//      if (graph == null) throw new RuntimeException("No graph!");
+//      renderfn.invoke(graph, filename);
     }
 
     private void dumpReasoning(List<WorkBasedOperatorRuntime> possibleWork, String filename) {
-      spit.invoke(
-              filename,
-              possibleWork.stream().map(rt ->
-                      rt.getOp().getId().getIDInt()
-                      + "," + rt.getGraphPriority()
-                      + ",["
-                      + rt.getOp().getInputPorts()
-                              .stream()
-                              .map(p ->
-                                      "[" + p.getIncomingArc().getSource().getId().getIDInt() + "-> :" + (p.hasSeenLastPacket() || !p.getIncomingArc().isQueueEmpty()) + "]")
-                              .collect(Collectors.joining(",")) + "],["
-                      + rt.getOp().getOutputPorts()
-                              .stream()
-                              .map(OutputPort::getOutgoingArcs)
-                              .flatMap(List::stream)
-                              .map(a ->
-                                      " ->" + a.getTarget().getId().getIDInt() + " : " + (a.getLoadEstimate() * 2 < a.getArcBoundary()))
-                              .collect(Collectors.joining(","))
-                      + "]"
-              ).collect(Collectors.joining("\n")));
+//      spit.invoke(
+//              filename,
+//              possibleWork.stream().map(rt ->
+//                      rt.getOp().getId().getIDInt()
+//                      + "," + rt.getGraphPriority()
+//                      + ",["
+//                      + rt.getOp().getInputPorts()
+//                              .stream()
+//                              .map(p ->
+//                                      "[" + p.getIncomingArc().getSource().getId().getIDInt() + "-> :" + (p.hasSeenLastPacket() || !p.getIncomingArc().isQueueEmpty()) + "]")
+//                              .collect(Collectors.joining(",")) + "],["
+//                      + rt.getOp().getOutputPorts()
+//                              .stream()
+//                              .map(OutputPort::getOutgoingArcs)
+//                              .flatMap(List::stream)
+//                              .map(a ->
+//                                      " ->" + a.getTarget().getId().getIDInt() + " : " + (a.getLoadEstimate() * 2 < a.getArcBoundary()))
+//                              .collect(Collectors.joining(","))
+//                      + "]"
+//              ).collect(Collectors.joining("\n")));
     }
 
     private WorkBasedOperatorRuntime scheduleInternal(Set<WorkBasedOperatorRuntime> graph, List<WorkBasedOperatorRuntime> possibleWork) {
@@ -194,51 +196,51 @@ public class PreparedRuntimeConfiguration extends RuntimeProcessConfiguration im
     private int lastOpId = -1;
     private int opCounter = 0;
     private static int MIN_PRIORITY = -2;
-    private static final IFn require = Clojure.var("clojure.core/require");
-    private static final IFn spit = Clojure.var("clojure.core", "spit");
-    private static final IFn renderfn;
+//    private static final IFn require = Clojure.var("clojure.core/require");
+//    private static final IFn spit = Clojure.var("clojure.core", "spit");
+//    private static final IFn renderfn;
     private int graphDumpSeqNum = 0;
     private boolean wasUnsuccessful = false;
 
     private static final boolean REPORT_FAILIURE = false;
 
-
-    static {
-      require.invoke(Clojure.read("[ohua.util.visual]"));
-      renderfn = Clojure.var("ohua.util.visual", "render-op-graph");
-    }
-
+// TODO I do understand that it is good to have such a thing here but having the Clojure dependency always in the engine/scheduler is not so cool.
+//    static {
+//      require.invoke(Clojure.read("[ohua.util.visual]"));
+//      renderfn = Clojure.var("ohua.util.visual", "render-op-graph");
+//    }
+//
     private void dumpGraph(Set graph, int chosen, String filename) {
-      if (graph == null) throw new RuntimeException("No graph!");
-      renderfn.invoke(graph, chosen, filename);
+//      if (graph == null) throw new RuntimeException("No graph!");
+//      renderfn.invoke(graph, chosen, filename);
     }
-
+//
     private void dumpGraph(Set graph, String filename) {
-      if (graph == null) throw new RuntimeException("No graph!");
-      renderfn.invoke(graph, filename);
+//      if (graph == null) throw new RuntimeException("No graph!");
+//      renderfn.invoke(graph, filename);
     }
-
+//
     private void dumpReasoning(final int desiredWorkSize, Map<WorkBasedOperatorRuntime, WorkBasedTaskScheduler.Either> possibleWork, String filename) {
-      spit.invoke(
-              filename,
-              possibleWork.keySet().stream().map(rt ->
-                      rt.getOp().getId().getIDInt()
-                              + "," + rt.getGraphPriority()
-                              + ",["
-                              + rt.getOp().getInputPorts()
-                              .stream()
-                              .map(p ->
-                                      "[" + p.getIncomingArc().getSource().getId().getIDInt() + "-> :" + (p.hasSeenLastPacket() || (p.getIncomingArc().getLoadEstimate() >= desiredWorkSize)) + "]")
-                              .collect(Collectors.joining(",")) + "],["
-                              + rt.getOp().getOutputPorts()
-                              .stream()
-                              .map(OutputPort::getOutgoingArcs)
-                              .flatMap(List::stream)
-                              .map(a ->
-                                      " ->" + a.getTarget().getId().getIDInt() + " : " + (a.getRemainingCapacityEstimate() >= desiredWorkSize))
-                              .collect(Collectors.joining(","))
-                              + "]"
-              ).collect(Collectors.joining("\n")));
+//      spit.invoke(
+//              filename,
+//              possibleWork.keySet().stream().map(rt ->
+//                      rt.getOp().getId().getIDInt()
+//                              + "," + rt.getGraphPriority()
+//                              + ",["
+//                              + rt.getOp().getInputPorts()
+//                              .stream()
+//                              .map(p ->
+//                                      "[" + p.getIncomingArc().getSource().getId().getIDInt() + "-> :" + (p.hasSeenLastPacket() || (p.getIncomingArc().getLoadEstimate() >= desiredWorkSize)) + "]")
+//                              .collect(Collectors.joining(",")) + "],["
+//                              + rt.getOp().getOutputPorts()
+//                              .stream()
+//                              .map(OutputPort::getOutgoingArcs)
+//                              .flatMap(List::stream)
+//                              .map(a ->
+//                                      " ->" + a.getTarget().getId().getIDInt() + " : " + (a.getRemainingCapacityEstimate() >= desiredWorkSize))
+//                              .collect(Collectors.joining(","))
+//                              + "]"
+//              ).collect(Collectors.joining("\n")));
     }
 
     private OperatorCore scheduleInternal(Set<OperatorCore> graph, final int desiredWorkSize, Map<WorkBasedOperatorRuntime, WorkBasedTaskScheduler.Either> possibleWork) {

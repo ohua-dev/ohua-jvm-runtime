@@ -14,18 +14,16 @@ import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 import ohua.runtime.engine.flowgraph.elements.operator.UserOperator;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Set;
 
-@Deprecated
-public class FunctionalOperatorFactory implements IOperatorFactory {
-    private static FunctionalOperatorFactory _funcFactory = new FunctionalOperatorFactory();
-    private static FunctionalOperatorDeserializer _deserializer = new FunctionalOperatorDeserializer();
+public class SFNLinker implements IOperatorFactory {
+    private static SFNLinker _funcFactory = new SFNLinker();
+    private static SFNDeserializer _deserializer = new SFNDeserializer();
 
-    protected FunctionalOperatorFactory() {
+    protected SFNLinker() {
     }
 
-    public static FunctionalOperatorFactory getInstance() {
+    public static SFNLinker getInstance() {
         OperatorFactory fac = OperatorFactory.getInstance();
         fac.setOperatorDescriptorDeserializer(_deserializer);
         return _funcFactory;

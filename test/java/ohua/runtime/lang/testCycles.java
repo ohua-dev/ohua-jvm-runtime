@@ -99,8 +99,8 @@ public class testCycles extends AbstractFlowTestCase
     ops.put("inc", RawIncOperator.class.getName());
     ops.put("func-cons", testFunctionalOperator.IntConsumer.class.getName());
     OperatorLibrary.registerOperators(ops, getTestMethodOutputDirectory() + "test-registry.xml");
-    Linker.loadCoreOperators();
-    Linker.loadAppOperators(getTestMethodOutputDirectory() + "test-registry.xml");
+    JavaSFNLinker.loadCoreOperators();
+    JavaSFNLinker.loadAppOperators(getTestMethodOutputDirectory() + "test-registry.xml");
     GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "flow-graph";
 
         OhuaRuntime runtime = new OhuaRuntime();

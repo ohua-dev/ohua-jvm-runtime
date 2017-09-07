@@ -19,7 +19,7 @@ import ohua.runtime.engine.UserRequest;
 import ohua.runtime.engine.UserRequestType;
 import ohua.runtime.engine.exceptions.OperatorLoadingException;
 import ohua.runtime.lang.operator.AbstractFunctionalOperator;
-import ohua.runtime.lang.operator.FunctionalOperatorFactory;
+import ohua.runtime.lang.operator.SFNLinker;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
 import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
 import ohua.runtime.exceptions.CompilationException;
@@ -140,7 +140,7 @@ public class OhuaRuntime extends OhuaProgram {
       
       @Override
       public AbstractFunctionalOperator createOperator(String type) throws OperatorLoadingException {
-        return (AbstractFunctionalOperator) FunctionalOperatorFactory.getInstance().createUserOperatorInstance(type);
+        return (AbstractFunctionalOperator) SFNLinker.getInstance().createUserOperatorInstance(type);
       }
 
       @Override

@@ -9,19 +9,15 @@ package ohua.runtime.engine.flowgraph.elements.operator;
 import ohua.runtime.engine.RuntimeProcessConfiguration;
 import ohua.runtime.engine.exceptions.Assertion;
 import ohua.runtime.engine.exceptions.OperatorLoadingException;
-import ohua.runtime.engine.exceptions.XMLParserException;
 import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.utils.parser.OperatorDescription;
 import ohua.runtime.engine.utils.parser.OperatorDescriptorDeserializer;
-import ohua.runtime.engine.utils.parser.OperatorMappingParser;
 
 import java.lang.reflect.Constructor;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-@Deprecated // TODO just remove the XML stuff here! descriptors can be inner classes of the ops.
 public class OperatorFactory implements IOperatorFactory
 {
   // operators
@@ -37,26 +33,6 @@ public class OperatorFactory implements IOperatorFactory
   }
 
   public static OperatorFactory getInstance() {
-//    if(_userOperatorRegistry == null) {
-//      OperatorMappingParser parser = new OperatorMappingParser();
-//      try {
-//        // TODO this should probably not use the system operators because on listing all user
-//        // ops there should be no system ops listed!
-//        _userOperatorRegistry = parser.loadOperatorMappings(registryFilter);
-//      } catch(XMLParserException e) {
-//        throw new RuntimeException(e);
-//      }
-//    }
-//
-//    if(_systemOperatorRegistry == null) {
-//      OperatorMappingParser parser = new OperatorMappingParser();
-//      try {
-//        _systemOperatorRegistry = parser.loadOperatorMappings("*SystemComponentRegistry.xml");
-//      } catch(XMLParserException e) {
-//        throw new RuntimeException(e);
-//      }
-//    }
-
     return _factory;
   }
 
@@ -171,13 +147,11 @@ public class OperatorFactory implements IOperatorFactory
     if(operatorImplementationClass == null) {
       throw new OperatorLoadingException("No implementation class found for operator: " + operatorName);
     }
-    Class<?> clz = null;
     try {
-      clz = Class.forName(operatorImplementationClass);
+      return Class.forName(operatorImplementationClass);
     } catch(ClassNotFoundException e) {
       throw new OperatorLoadingException(e);
     }
-    return clz;
   }
 
   /**
@@ -217,10 +191,6 @@ public class OperatorFactory implements IOperatorFactory
 
   public OperatorDescription getOperatorDescription(String operatorName) {
     return _operatorDescriptors.get(operatorName);
-  }
-
-  public String getSourceCodeReference(String operatorName) {
-    return _userOperatorRegistry.get(operatorName);
   }
 
   public UserOperator createUserOperator(FlowGraph graph, String operatorType, String displayName) throws OperatorLoadingException {
@@ -274,12 +244,8 @@ public class OperatorFactory implements IOperatorFactory
     return _userOperatorRegistry.keySet();
   }
 
-  public Collection<String> getRegisteredOperatorClasses() {
-    return _userOperatorRegistry.values();
-  }
-
   public void clear() {
-    _userOperatorRegistry = null;
-    _systemOperatorRegistry = null;
+    _userOperatorRegistry = new HashMap<>();
+    _systemOperatorRegistry = new HashMap<>();
   }
 }
