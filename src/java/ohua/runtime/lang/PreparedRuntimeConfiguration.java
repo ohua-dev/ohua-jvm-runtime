@@ -5,8 +5,6 @@
  */
 package ohua.runtime.lang;
 
-import clojure.java.api.Clojure;
-import clojure.lang.*;
 import ohua.runtime.engine.AbstractRuntime;
 import ohua.runtime.engine.ConfigurationExtension;
 import ohua.runtime.engine.RuntimeProcessConfiguration;
@@ -72,57 +70,20 @@ public class PreparedRuntimeConfiguration extends RuntimeProcessConfiguration im
     }
   }
 
+  public interface IOperatorSchedulerDebugger {
+    default void dumpGraph(Set graph, int chosen, String filename) {}
+    default void dumpGraph(Set graph, String filename) {}
+    default void dumpReasoning(List<WorkBasedOperatorRuntime> possibleWork, String filename) {}
+  }
+
   private static class OpScheduler implements WorkBasedOperatorScheduler.IOperatorSchedulingAlgorithm {
     private int lastOpId = -1;
     private int opCounter = 0;
     private static int MIN_PRIORITY = -2;
-//    private static final IFn require = Clojure.var("clojure.core/require");
-//    private static final IFn spit = Clojure.var("clojure.core", "spit");
-//    private static final IFn renderfn;
     private int graphDumpSeqNum = 0;
     private boolean wasUnsuccessful = false;
     private static final boolean REPORT_FAILURE = false;
-
-
-    // TODO I do understand that it is good to have such a thing here but having the Clojure dependency always in the engine/scheduler is not so cool.
-    // FIXME duplicate code: TaskScheduler
-//    static {
-//      require.invoke(Clojure.read("[ohua.util.visual]"));
-//      renderfn = Clojure.var("ohua.util.visual", "render-runtime-graph");
-//    }
-
-    private void dumpGraph(Set graph, int chosen, String filename) {
-//      if (graph == null) throw new RuntimeException("No graph!");
-//      renderfn.invoke(graph, chosen, filename);
-    }
-
-    private void dumpGraph(Set graph, String filename) {
-//      if (graph == null) throw new RuntimeException("No graph!");
-//      renderfn.invoke(graph, filename);
-    }
-
-    private void dumpReasoning(List<WorkBasedOperatorRuntime> possibleWork, String filename) {
-//      spit.invoke(
-//              filename,
-//              possibleWork.stream().map(rt ->
-//                      rt.getOp().getId().getIDInt()
-//                      + "," + rt.getGraphPriority()
-//                      + ",["
-//                      + rt.getOp().getInputPorts()
-//                              .stream()
-//                              .map(p ->
-//                                      "[" + p.getIncomingArc().getSource().getId().getIDInt() + "-> :" + (p.hasSeenLastPacket() || !p.getIncomingArc().isQueueEmpty()) + "]")
-//                              .collect(Collectors.joining(",")) + "],["
-//                      + rt.getOp().getOutputPorts()
-//                              .stream()
-//                              .map(OutputPort::getOutgoingArcs)
-//                              .flatMap(List::stream)
-//                              .map(a ->
-//                                      " ->" + a.getTarget().getId().getIDInt() + " : " + (a.getLoadEstimate() * 2 < a.getArcBoundary()))
-//                              .collect(Collectors.joining(","))
-//                      + "]"
-//              ).collect(Collectors.joining("\n")));
-    }
+    public IOperatorSchedulerDebugger _debugger = new IOperatorSchedulerDebugger() {};
 
     private WorkBasedOperatorRuntime scheduleInternal(Set<WorkBasedOperatorRuntime> graph, List<WorkBasedOperatorRuntime> possibleWork) {
 
@@ -153,14 +114,14 @@ public class PreparedRuntimeConfiguration extends RuntimeProcessConfiguration im
       if (candidate == null) {
         if (REPORT_FAILURE) {
           System.out.println("No suitable ideal candidate found, scheduling last operator");
-          dumpGraph(graph, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum + ".dot");
-          dumpReasoning(possibleWork, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum++ + ".reasoning");
+          _debugger.dumpGraph(graph, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum + ".dot");
+          _debugger.dumpReasoning(possibleWork, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum++ + ".reasoning");
           wasUnsuccessful = true;
         }
         return possibleWork.get(possibleWork.size() - 1);
       } else {
         if (wasUnsuccessful) {
-          if (REPORT_FAILURE) dumpGraph(graph, candidate.getOp().getId().getIDInt() ,"debug-dump/scheduler-graphs/successful-" + graphDumpSeqNum++ + ".dot");
+          if (REPORT_FAILURE) _debugger.dumpGraph(graph, candidate.getOp().getId().getIDInt() ,"debug-dump/scheduler-graphs/successful-" + graphDumpSeqNum++ + ".dot");
         }
       }
 
@@ -192,56 +153,21 @@ public class PreparedRuntimeConfiguration extends RuntimeProcessConfiguration im
     }
   }
 
+  public interface ITaskSchedulerDebugger{
+    default void dumpGraph(Set graph, int chosen, String filename) {};
+    default void dumpGraph(Set graph, String filename) {};
+    default void dumpReasoning(final int desiredWorkSize, Map<WorkBasedOperatorRuntime, WorkBasedTaskScheduler.Either> possibleWork, String filename) {};
+  }
+
   private static class TaskScheduler implements WorkBasedTaskScheduler.ISchedulingAlgorithm {
     private int lastOpId = -1;
     private int opCounter = 0;
     private static int MIN_PRIORITY = -2;
-//    private static final IFn require = Clojure.var("clojure.core/require");
-//    private static final IFn spit = Clojure.var("clojure.core", "spit");
-//    private static final IFn renderfn;
     private int graphDumpSeqNum = 0;
     private boolean wasUnsuccessful = false;
 
     private static final boolean REPORT_FAILIURE = false;
-
-// TODO I do understand that it is good to have such a thing here but having the Clojure dependency always in the engine/scheduler is not so cool.
-//    static {
-//      require.invoke(Clojure.read("[ohua.util.visual]"));
-//      renderfn = Clojure.var("ohua.util.visual", "render-op-graph");
-//    }
-//
-    private void dumpGraph(Set graph, int chosen, String filename) {
-//      if (graph == null) throw new RuntimeException("No graph!");
-//      renderfn.invoke(graph, chosen, filename);
-    }
-//
-    private void dumpGraph(Set graph, String filename) {
-//      if (graph == null) throw new RuntimeException("No graph!");
-//      renderfn.invoke(graph, filename);
-    }
-//
-    private void dumpReasoning(final int desiredWorkSize, Map<WorkBasedOperatorRuntime, WorkBasedTaskScheduler.Either> possibleWork, String filename) {
-//      spit.invoke(
-//              filename,
-//              possibleWork.keySet().stream().map(rt ->
-//                      rt.getOp().getId().getIDInt()
-//                              + "," + rt.getGraphPriority()
-//                              + ",["
-//                              + rt.getOp().getInputPorts()
-//                              .stream()
-//                              .map(p ->
-//                                      "[" + p.getIncomingArc().getSource().getId().getIDInt() + "-> :" + (p.hasSeenLastPacket() || (p.getIncomingArc().getLoadEstimate() >= desiredWorkSize)) + "]")
-//                              .collect(Collectors.joining(",")) + "],["
-//                              + rt.getOp().getOutputPorts()
-//                              .stream()
-//                              .map(OutputPort::getOutgoingArcs)
-//                              .flatMap(List::stream)
-//                              .map(a ->
-//                                      " ->" + a.getTarget().getId().getIDInt() + " : " + (a.getRemainingCapacityEstimate() >= desiredWorkSize))
-//                              .collect(Collectors.joining(","))
-//                              + "]"
-//              ).collect(Collectors.joining("\n")));
-    }
+    public static ITaskSchedulerDebugger _debugger = new ITaskSchedulerDebugger() {};
 
     private OperatorCore scheduleInternal(Set<OperatorCore> graph, final int desiredWorkSize, Map<WorkBasedOperatorRuntime, WorkBasedTaskScheduler.Either> possibleWork) {
 
@@ -301,21 +227,21 @@ public class PreparedRuntimeConfiguration extends RuntimeProcessConfiguration im
           if (REPORT_FAILIURE) {
             System.out.println("No suitable candidate found, using default scheduling algorithm");
             wasUnsuccessful = true;
-            dumpGraph(graph, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum + ".dot");
-            dumpReasoning(desiredWorkSize, possibleWork, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum++ + ".reasoning");
+            _debugger.dumpGraph(graph, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum + ".dot");
+            _debugger.dumpReasoning(desiredWorkSize, possibleWork, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum++ + ".reasoning");
           }
           return WorkBasedTaskScheduler.DEFAULT_SCHEDULING_ALGO.schedule(graph, desiredWorkSize, possibleWork);
         } else {
           if (REPORT_FAILIURE) {
             System.out.println("No suitable ideal candidate found");
-            dumpGraph(graph, "debug-dump/scheduler-graphs/no-ideal-" + graphDumpSeqNum + ".dot");
-            dumpReasoning(desiredWorkSize, possibleWork, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum++ + ".reasoning");
+            _debugger.dumpGraph(graph, "debug-dump/scheduler-graphs/no-ideal-" + graphDumpSeqNum + ".dot");
+            _debugger.dumpReasoning(desiredWorkSize, possibleWork, "debug-dump/scheduler-graphs/unsuccessful-" + graphDumpSeqNum++ + ".reasoning");
           }
           return candidate;
         }
       } else {
         if (wasUnsuccessful) {
-          if (REPORT_FAILIURE) dumpGraph(graph, "debug-dump/scheduler-graphs/successful-" + graphDumpSeqNum++ + ".dot");
+          if (REPORT_FAILIURE) _debugger.dumpGraph(graph, "debug-dump/scheduler-graphs/successful-" + graphDumpSeqNum++ + ".dot");
         }
       }
 
