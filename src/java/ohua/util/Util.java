@@ -1,5 +1,6 @@
 package ohua.util;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -36,6 +37,36 @@ public class Util {
     }
 
     T applyThrows(S s) throws Exception;
+  }
+
+  @FunctionalInterface
+  public interface ThrowingConsumer<S> extends Consumer<S> {
+
+    @Override
+    default void accept(S s) {
+      try {
+        acceptThrows(s);
+      } catch (final Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    void acceptThrows(S s) throws Exception;
+  }
+
+  @FunctionalInterface
+  public interface ThrowingRunnable extends Runnable {
+
+    @Override
+    default void run() {
+      try {
+        runThrows();
+      } catch (final Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    void runThrows() throws Throwable;
   }
 
 }

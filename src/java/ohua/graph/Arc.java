@@ -7,11 +7,11 @@ package ohua.graph;
 
 
 public final class Arc {
-    public final Target target;
-    public final Source source;
+  public final Source source;
+  public final Target target;
 
-    public Arc(final Target target, final Source source) {
-        this.target = target;
-        this.source = source;
-    }
+  public Arc(final Source source, final Target target) {
+    this.source = source;
+    this.target = target;
+  }
 }

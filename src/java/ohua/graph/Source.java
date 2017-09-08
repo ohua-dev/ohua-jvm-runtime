@@ -18,9 +18,9 @@ public abstract class Source {
     }
 
     public static final class Env extends Source {
-        public final int hostExpr;
+        public final Object hostExpr;
 
-        public Env(final int hostExpr) {
+        public Env(final Object hostExpr) {
             this.hostExpr = hostExpr;
         }
     }
