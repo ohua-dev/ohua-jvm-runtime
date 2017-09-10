@@ -1,0 +1,8 @@
+language: clojure
+lein: 2.6.1 # version 2 and up
+script: lein do clean, javac, compile, junit
+jdk:
+  - openjdk8
+branches:
+  only:
+    - master
