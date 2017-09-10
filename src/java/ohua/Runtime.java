@@ -23,11 +23,11 @@ public abstract class Runtime {
   Runtime() {
   }
 
-  public static Runnable prepare(Graph graph) {
+  public static Runnable prepare(Graph<Object> graph) {
     return prepare(graph, new RuntimeProcessConfiguration());
   }
 
-  public static Runnable prepare(Graph graph, RuntimeProcessConfiguration config) {
+  public static Runnable prepare(Graph<Object> graph, RuntimeProcessConfiguration config) {
     OhuaRuntime runtime = new OhuaRuntime();
 
     Arrays.stream(graph.operators).forEach((Util.ThrowingConsumer<Operator>) op -> runtime.createOperator(op.type, op.id));

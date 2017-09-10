@@ -39,7 +39,7 @@ public class testCycles extends AbstractFlowTestCase
       registerFunc("inc", IncOperator.class.getDeclaredMethod("inc", int.class, String.class));
       registerFunc("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
       JavaBackendProvider.loadCoreOperators();
-    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "flow-graph";
+//    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "flow-graph";
 
     OhuaRuntime runtime = new OhuaRuntime();
       createOp(runtime, "func-prod", 100);
@@ -102,7 +102,7 @@ public class testCycles extends AbstractFlowTestCase
     JavaSFNLinker.loadCoreOperators();
     // FIXME
 //    JavaSFNLinker.loadAppOperators(getTestMethodOutputDirectory() + "test-registry.xml");
-    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "flow-graph";
+//    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "flow-graph";
 
         OhuaRuntime runtime = new OhuaRuntime();
         createOp(runtime, "func-prod", 100);

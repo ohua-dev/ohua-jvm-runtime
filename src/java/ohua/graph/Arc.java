@@ -6,11 +6,11 @@
 package ohua.graph;
 
 
-public final class Arc {
-  public final Source source;
+public final class Arc<T> {
+  public final Source<T> source;
   public final Target target;
 
-  public Arc(final Source source, final Target target) {
+  public Arc(final Source<T> source, final Target target) {
     this.source = source;
     this.target = target;
   }

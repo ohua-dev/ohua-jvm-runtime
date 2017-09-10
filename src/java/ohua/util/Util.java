@@ -61,7 +61,7 @@ public class Util {
     default void run() {
       try {
         runThrows();
-      } catch (final Exception e) {
+      } catch (final Throwable e) {
         throw new RuntimeException(e);
       }
     }

@@ -5,7 +5,6 @@
  */
 package ohua.runtime.lang;
 
-import ohua.link.JavaBackendProvider;
 import ohua.runtime.lang.operator.IFunctionalOperator;
 import ohua.runtime.lang.operator.SFNLinker;
 import ohua.util.Tuple;
@@ -19,8 +18,6 @@ import ohua.runtime.engine.flowgraph.elements.operator.*;
 import ohua.runtime.engine.flowgraph.elements.operator.Arc.ArcType;
 import ohua.runtime.exceptions.CompilationException;
 import ohua.runtime.exceptions.CompilationException.CAUSE;
-import ohua.link.Linker;
-import org.codehaus.janino.Java;
 
 import java.util.*;
 

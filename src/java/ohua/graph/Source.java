@@ -6,7 +6,7 @@
 package ohua.graph;
 
 
-public abstract class Source {
+public abstract class Source<T> {
     Source() {}
 
     public static final class Local extends Source {
@@ -17,10 +17,10 @@ public abstract class Source {
         }
     }
 
-    public static final class Env extends Source {
-        public final Object hostExpr;
+    public static final class Env<T> extends Source<T> {
+        public final T hostExpr;
 
-        public Env(final Object hostExpr) {
+        public Env(final T hostExpr) {
             this.hostExpr = hostExpr;
         }
     }

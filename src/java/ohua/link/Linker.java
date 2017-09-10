@@ -15,6 +15,7 @@ import clojure.lang.IFn;
 /**
  * Created by justusadam on 01/12/2016.
  */
+@Deprecated
 public final class Linker {
     private static final IFn require = Clojure.var("clojure.core", "require");
     private static final IFn isBuiltin;

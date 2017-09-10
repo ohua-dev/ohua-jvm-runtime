@@ -6,9 +6,9 @@
 package ohua.graph;
 
 
-public final class Graph {
+public final class Graph<T> {
     public final Operator[] operators;
-    public final Arc[] arcs;
+    public final Arc<T>[] arcs;
 
     public Graph(final Operator[] operators, final Arc[] arcs) {
         this.operators = operators;
