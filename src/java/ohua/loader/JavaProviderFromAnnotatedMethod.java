@@ -16,8 +16,10 @@ import ohua.runtime.engine.exceptions.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-final class JavaProviderFromAnnotatedMethod implements StatefulFunctionProvider {
+public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionProvider {
     private Map<String,Optional<Map<String,Method>>> nsMap = new HashMap<>();
+
+    public JavaProviderFromAnnotatedMethod() {}
 
     @Override
     public boolean exists(String nsRef, String sfRef) {
@@ -54,7 +56,7 @@ final class JavaProviderFromAnnotatedMethod implements StatefulFunctionProvider 
         I left this bit of code out. We need to see wether we need it.
         java-pkg-name (string/replace pkg-name "-" "_")
         */
-        String javaPkgName = namespace;
+        String javaPkgName = namespace.replace("-", "_");
         Map<String,Method> mappedToClass =
             loadFromClassPath(namespace.replace(".", "/"), "*.class")
                 .map(path -> javaPkgName + "." + path.getFileName().toString().replace(".class", ""))
