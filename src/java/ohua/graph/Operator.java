@@ -15,4 +15,9 @@ public final class Operator {
         this.id = id;
         this.type = type;
     }
+
+    public Operator(final Integer id, final String type) {
+        this.id = id;
+        this.type = type;
+    }
 }

@@ -10,7 +10,7 @@ public final class Arc<T> {
   public final Source<T> source;
   public final Target target;
 
-  public Arc(final Source<T> source, final Target target) {
+  public Arc(final Target target, final Source<T> source) {
     this.source = source;
     this.target = target;
   }

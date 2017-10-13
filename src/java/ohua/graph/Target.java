@@ -15,4 +15,9 @@ public final class Target {
         this.operator = operator;
         this.index = index;
     }
+
+    public Target(final Integer operator, final Integer index) {
+        this.operator = operator;
+        this.index = index;
+    }
 }
