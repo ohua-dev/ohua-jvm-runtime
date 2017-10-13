@@ -1,83 +1,89 @@
 package ohua.loader;
 
 import ohua.StatefulFunctionProvider;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import ohua.runtime.lang.operator.StatefulFunction;
 
 public final class MultiDispatchSFProvider implements StatefulFunctionProvider {
-    private final StatefulFunctionProvider[] dispatchArray;
-    private final Map<String, Map<String,StatefulFunctionProvider>> dispatchCache;
+    private final List<StatefulFunctionProvider> dispatchList;
 
     public MultiDispatchSFProvider(StatefulFunctionProvider[] loaders) {
-        this.dispatchArray = loaders;
-        dispatchCache = new HashMap<>();
+        this.dispatchList = Arrays.asList(loaders);
     }
 
     @Override
     public boolean exists(String nsRef, String sfRef) {
-        return containsKey(nsRef, sfRef) || fromDispatchers(nsRef, sfRef);
-    }
-
-    private boolean containsKey(String nsRef, String sfRef) {
-        return get(nsRef, sfRef) != null;
-    }
-
-    private StatefulFunctionProvider get(String nsRef, String sfRef) {
-        Map<String,StatefulFunctionProvider> m2 = dispatchCache.get(nsRef);
-        if (!(m2==null))
-            return m2.get(sfRef);
-        return null;
-    }
-
-    private void put(String nsRef, String sfRef, StatefulFunctionProvider sf) {
-        Map<String,StatefulFunctionProvider> m2 = dispatchCache.get(nsRef);
-        if (m2==null) {
-            m2 = new HashMap<>();
-            dispatchCache.put(nsRef, m2);
+        for (StatefulFunctionProvider p : dispatchList) {
+            if (p.exists(nsRef, sfRef))
+                return true;
         }
-        m2.put(sfRef, sf);
+        return false;
     }
 
     @Override
     public StatefulFunction provide(String nsRef, String sfRef) throws Exception {
-        StatefulFunctionProvider loader = get(nsRef, sfRef);
-
-        if (loader == null) {
-            if (fromDispatchers(nsRef, sfRef))
-                loader = get(nsRef, sfRef);
-            else
-                return null;
+        for (StatefulFunctionProvider p : dispatchList) {
+            StatefulFunction s = p.provide(nsRef, sfRef);
+            if (s != null)
+                return s;
         }
-
-        StatefulFunction sf = loader.provide(nsRef, sfRef);
-
-        if (sf == null)
-            throw new InvariantBrokenException("StatefulFunctionProvider " + loader + " claimed " + sfRef + " existed but did not provide it.");
-
-        return sf;
+        return null;
     }
 
+    @Override
+    public Iterator<String> list(String nsRef) {
+        return new Iter(nsRef);
+    }
 
-    private boolean fromDispatchers(String nsRef, String sfRef) {
-        for (StatefulFunctionProvider l: dispatchArray) {
-            if (l.exists(nsRef, sfRef)) {
-                put(nsRef, sfRef, l);
-                return true;
-            }
+    final class Iter implements Iterator<String> {
+        Iterator<String> currentIt;
+        Iterator<StatefulFunctionProvider> others = dispatchList.iterator();
+        final String nsRef;
+
+        Iter (String nsRef) {
+            this.nsRef = nsRef;
+            advance();
         }
 
-        return false;
+        @Override
+        public boolean hasNext() {
+            return 
+                currentIt != null
+                && (currentIt.hasNext() || advanceUntilHasNext());
+        }
+
+        @Override
+        public String next() {
+            if (hasNext())
+                return currentIt.next();
+            else 
+                throw new NoSuchElementException();
+            
+        }
+
+        private boolean advance() {
+            if (others.hasNext()) {
+                currentIt = others.next().list(nsRef);
+                return true;
+            }
+            return false;
+
+        }
+
+        private boolean advanceUntilHasNext() {
+            if (currentIt == null)
+                return false;
+            while (!currentIt.hasNext()) {
+                if (!advance())
+                    return false;
+            }
+            return true;
+        }
+        
     }
 
     public static MultiDispatchSFProvider combine(StatefulFunctionProvider... loaders) {
         return new MultiDispatchSFProvider(loaders);
-    }
-
-    private static final class InvariantBrokenException extends RuntimeException {
-        InvariantBrokenException(String msg) {
-            super(msg);
-        }
     }
 
 }

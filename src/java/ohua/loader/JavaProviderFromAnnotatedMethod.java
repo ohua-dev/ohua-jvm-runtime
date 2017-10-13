@@ -11,10 +11,10 @@ import java.util.function.Consumer;
 import ohua.lang.defsfn;
 import java.lang.reflect.Method;
 import java.util.function.Function;
-import ohua.util.Tuple;
 import ohua.runtime.engine.exceptions.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import ohua.util.*;
 
 public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionProvider {
     private Map<String,Optional<Map<String,Method>>> nsMap = new HashMap<>();
@@ -37,18 +37,33 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
         );
     }
 
-    private Method findMethod(String nsRef, String sfRef) {
-        Optional<Map<String,Method>> m1 = nsMap.get(nsRef);
+    @Override
+    public Iterator<String> list(String nsRef) {
+        return getOrLoadNS(nsRef).map(Map::keySet).map(Iterable::iterator).orElse(EmptyIterator.it());
+    }
 
-        if (m1 == null) {
-            try {
-                m1 = Optional.of(loadNamespace(nsRef));
-            } catch (IOException e) {
-                m1 = Optional.empty();
-            }
-            nsMap.put(nsRef, m1);
+    private Optional<Map<String,Method>> getOrLoadNS(String nsRef) {
+        if (!nsMap.containsKey(nsRef)) {
+            Optional<Map<String,Method>> mmap = tryLoadNS(nsRef);
+            nsMap.put(nsRef, mmap);
+            return mmap;
+        } else {
+            return nsMap.get(nsRef);
+        }   
+    }
+
+    private Optional<Map<String,Method>> tryLoadNS(String nsRef) {
+        Optional<Map<String,Method>> m1;
+        try {
+            m1 = Optional.of(loadNamespace(nsRef));
+        } catch (IOException e) {
+            m1 = Optional.empty();
         }
-        return m1.map(m -> m.get(sfRef)).orElse(null);
+        return m1;
+    }
+
+    private Method findMethod(String nsRef, String sfRef) {
+        return getOrLoadNS(nsRef).map(m -> m.get(sfRef)).orElse(null);
     }
 
     private Map<String,Method> loadNamespace(String namespace) throws IOException {
@@ -89,10 +104,12 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
 
     private Method getSfnMethod(Class<?> clazz) {
         List<Method> l = Stream.of(clazz.getDeclaredMethods()).filter(m -> m.isAnnotationPresent(defsfn.class)).collect(Collectors.toList());
-        if (l.size() == 1)
-            return l.get(0);
-        else
-            throw new RuntimeException("Class " + clazz + " defines two stateful functions!");
+        switch (l.size()) {
+            case 0: return null;
+            case 1: return l.get(0);
+            default:
+                throw new RuntimeException("Class " + clazz + " defines more than one stateful functions!");
+        }
     }
 
     private Stream<Path> loadFromClassPath(String folder, String glob) throws IOException {
