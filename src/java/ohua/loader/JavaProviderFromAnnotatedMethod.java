@@ -15,9 +15,10 @@ import ohua.runtime.engine.exceptions.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import ohua.util.*;
+import ohua.runtime.lang.operator.SFNLinker;
 
 public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionProvider {
-    private Map<String,Optional<Map<String,Method>>> nsMap = new HashMap<>();
+    private final Map<String,Optional<Map<String,Method>>> nsMap = new HashMap<>();
 
     public JavaProviderFromAnnotatedMethod() {}
 
@@ -55,7 +56,9 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
     private Optional<Map<String,Method>> tryLoadNS(String nsRef) {
         Optional<Map<String,Method>> m1;
         try {
-            m1 = Optional.of(loadNamespace(nsRef));
+            Map<String,Method> loaded = loadNamespace(nsRef);
+            m1 = Optional.of(loaded);
+            registerAllWithSFNLinker(nsRef, loaded.values());
         } catch (IOException e) {
             m1 = Optional.empty();
         }
@@ -100,6 +103,13 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
                             throw new RuntimeException("Stateful function " + a.getName() + " is defined twice.");
                         }
                     ));
+    }
+
+    private void registerAllWithSFNLinker(String nsRef, Iterable<Method> methods) {
+        for (Method method : methods) {
+            String ref = nsRef + "/" + method.getName();
+            SFNLinker.getInstance().registerUserOperator(ref, method.getDeclaringClass().getName());
+        }
     }
 
     private Method getSfnMethod(Class<?> clazz) {
@@ -148,5 +158,9 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
             res.add(p);
         return res;
 
+    }
+
+    public Iterable<Method> getMethods(String nsRef) {
+        return nsMap.get(nsRef).get().values();
     }
 }
