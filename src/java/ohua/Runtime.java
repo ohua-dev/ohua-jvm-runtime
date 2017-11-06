@@ -13,8 +13,12 @@ import ohua.runtime.engine.RuntimeProcessConfiguration;
 import ohua.runtime.lang.OhuaRuntime;
 import ohua.util.Tuple;
 import ohua.util.Util;
+import ohua.util.Lazy;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by sertel on 9/7/17.
@@ -38,14 +42,27 @@ public abstract class Runtime {
                     ((Source.Local) arc.source).target.index,
                     arc.target.operator,
                     arc.target.index));
-    Arrays.stream(graph.arcs)
-            .filter(arc -> arc.source instanceof Source.Env)
-            .forEach((Util.ThrowingConsumer<Arc>)
-                    arc -> runtime.setArguments(
-                            arc.target.operator,
-                            new Tuple[]{new Tuple(arc.target.index, ((Source.Env) arc.source).hostExpr)}));
 
-    return (Util.ThrowingRunnable) () -> runtime.execute(config);
+    Map<Integer, List<Arc>> envAssoc =
+        Arrays.stream(graph.arcs)
+              .filter(arc -> arc.source instanceof Source.Env)
+              .collect(Collectors.groupingBy(
+                  arc -> arc.target.operator
+              ));
+    envAssoc.values().forEach(
+        arcs -> arcs.sort((a, b) -> a.target.index - b.target.index ));
+
+    return (Util.ThrowingRunnable) () -> {
+        envAssoc.forEach((Util.ThrowingBiConsumer<Integer, List<Arc>>) (Integer op, List<Arc> arcs) ->
+            runtime.setArguments(
+                op,
+                arcs.stream()
+                    .map(arc ->
+                        new Tuple<>(arc.target.index, ((Source.Env<Object>) arc.source).hostExpr))
+                    .toArray(Tuple[]::new))
+        );
+        runtime.execute(config);
+    };
   }
 
 }

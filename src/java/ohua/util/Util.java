@@ -1,8 +1,6 @@
 package ohua.util;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * Created by sertel on 12/15/16.
@@ -52,6 +50,21 @@ public class Util {
     }
 
     void acceptThrows(S s) throws Exception;
+  }
+
+  @FunctionalInterface
+  public interface ThrowingBiConsumer<S, T> extends BiConsumer<S, T> {
+
+    @Override
+    default void accept(S s, T t) {
+      try {
+        acceptThrows(s, t);
+      } catch (final Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    void acceptThrows(S s, T t) throws Exception;
   }
 
   @FunctionalInterface
