@@ -13,6 +13,7 @@ import ohua.runtime.engine.RuntimeProcessConfiguration;
 import ohua.runtime.lang.OhuaRuntime;
 import ohua.util.Tuple;
 import ohua.util.Util;
+import ohua.util.Lazy;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -26,11 +27,11 @@ public abstract class Runtime {
   Runtime() {
   }
 
-  public static Runnable prepare(Graph<Object> graph) {
+  public static Runnable prepare(Graph<Lazy<Object>> graph) {
     return prepare(graph, new RuntimeProcessConfiguration());
   }
 
-  public static Runnable prepare(Graph<Object> graph, RuntimeProcessConfiguration config) {
+  public static Runnable prepare(Graph<Lazy<Object>> graph, RuntimeProcessConfiguration config) {
     OhuaRuntime runtime = new OhuaRuntime();
 
     Arrays.stream(graph.operators).forEach((Util.ThrowingConsumer<Operator>) op -> runtime.createOperator(op.type, op.id));
@@ -42,7 +43,7 @@ public abstract class Runtime {
                     arc.target.operator,
                     arc.target.index));
 
-    Map<Integer, List<Arc>> envAssoc =
+    Map<Integer, List<Arc<Lazy<Object>>>> envAssoc =
         Arrays.stream(graph.arcs)
               .filter(arc -> arc.source instanceof Source.Env)
               .collect(Collectors.groupingBy(
@@ -52,12 +53,12 @@ public abstract class Runtime {
         arcs -> arcs.sort((a, b) -> a.target.index - b.target.index ));
 
     return (Util.ThrowingRunnable) () -> {
-        envAssoc.forEach((Util.ThrowingBiConsumer<Integer, List<Arc>>) (Integer op, List<Arc> arcs) ->
+        envAssoc.forEach((Util.ThrowingBiConsumer<Integer, List<Arc<Lazy<Object>>>>) (Integer op, List<Arc<Lazy<Object>>> arcs) ->
             runtime.setArguments(
                 op,
                 arcs.stream()
                     .map(arc ->
-                        new Tuple<>(arc.target.index, ((Source.Env<Object>) arc.source).hostExpr))
+                        new Tuple<>(arc.target.index, ((Source.Env<Lazy<Object>>) arc.source).hostExpr.get()))
                     .toArray(Tuple[]::new))
         );
         runtime.execute(config);
