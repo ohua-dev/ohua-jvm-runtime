@@ -3,62 +3,18 @@ package ohua.util;
 import java.util.function.Supplier;
 
 
-public final class Lazy<T> implements Supplier<T> {
-    private static final Supplier NO_VALUE_SUPPLIER = new Supplier<Object>() {
-        @Override
-        public Object get() {
-            throw new RuntimeException("This supplier has no value");
-        }
-    };
+/**
+ * A lazy is a special type of supplier which executes a computation the first time the `get`
+ * method is called and on subsequent calls always returns that constant value.
+ */
+public interface Lazy<T> extends Supplier<T> {
+    public boolean isRealized();
 
-    private final Supplier<T> supplier;
-    private boolean realized = false;
-    private T value = null;
-
-    private Lazy(Supplier<T> init) {
-        supplier = init;
-        realized = false;
-        value = null;
-    }
-
-    private Lazy(T value) {
-        supplier = (Supplier<T>) NO_VALUE_SUPPLIER;
-        realized = true;
-        this.value = value;
-    }
-
-    public static <T> Lazy<T> createLazy(Supplier<T> supplier) {
-        return new Lazy(supplier);
+    public static <T> Lazy<T> createLazy(Supplier<T> createValue) {
+        return SubclassBasedLazy.createLazy(createValue);
     }
 
     public static <T> Lazy<T> createRealized(T value) {
-        return new Lazy(value);
+        return SubclassBasedLazy.createRealized(value);
     }
-
-    private synchronized T realize() {
-        if (realized) {
-            return value;
-        } else if (value != null) {
-            throw new RuntimeException("INVARIANT BROKEN: unrealized lazy value had non-null value.");
-        } else {
-            value = supplier.get();
-            realized = true;
-            return value;
-        }
-    }
-
-    @Override
-    public T get() {
-        return realize();
-    }
-
-    @Override
-    public String toString() {
-        if (realized) {
-            return "Lazy(" + value.toString() + ")";
-        } else {
-            return "Lazy(_)";
-        }
-    }
-
 }
