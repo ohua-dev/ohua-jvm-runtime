@@ -20,19 +20,19 @@ public class OperatorID extends ScopedUniqueID
   // stated by the flow author.
   public static class OperatorIDGenerator
   {
-    private static int _operatorIDCounter = 0;
-    
-    public static OperatorID generateNewOperatorID()
+      private int _operatorIDCounter = 0;
+
+      public OperatorID generateNewOperatorID()
     {
       return new OperatorID(_operatorIDCounter++);
     }
-    
-    public static void resetCounter()
+
+      public void resetCounter()
     {
       _operatorIDCounter = 0;
     }
-    
-    public static void setStartValue(int startValue)
+
+      public void setStartValue(int startValue)
     {
       _operatorIDCounter = startValue;
     }

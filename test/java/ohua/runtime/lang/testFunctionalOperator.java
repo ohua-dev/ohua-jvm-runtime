@@ -7,7 +7,6 @@ package ohua.runtime.lang;
 
 import ohua.lang.defsfn;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
-import ohua.runtime.engine.utils.GraphVisualizer;
 import ohua.runtime.test.AbstractFlowTestCase;
 import ohua.util.Tuple;
 import org.junit.Assert;
@@ -18,7 +17,7 @@ import org.junit.Test;
 public class testFunctionalOperator extends AbstractFlowTestCase {
   @Before
   public void clearLinker() {
-    OperatorFactory.getInstance().clear();
+      OperatorFactory.clear();
   }
 
   /**
@@ -26,8 +25,8 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
    */
   @Test(timeout = 20000)
   public void testImplicitSchemaMatching() throws Throwable {
-    registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
-    registerFunc("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
+      registerFunction("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -57,9 +56,9 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
   // TODO @sertel please have a look at what invariant is broken here, maybe you can figure it out
   public void testImplicitMatchMultipleInputs() throws Throwable {
     clearCache();
-    registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
-    registerFunc("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
-    registerFunc("func-merge", FunctionalMerge.class.getDeclaredMethod("merge", int.class, String.class, int.class, String.class));
+      registerFunction("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
+      registerFunction("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
+      registerFunction("func-merge", FunctionalMerge.class.getDeclaredMethod("merge", int.class, String.class, int.class, String.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -112,10 +111,10 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
   @Test(timeout = 20000)
   public void testExplicitSchemaMatching() throws Throwable {
     clearCache();
-    registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
-    registerFunc("func-peek", FunctionalPeek.class.getDeclaredMethod("peek", int.class, String.class));
-    registerFunc("int-cons", IntConsumer.class.getDeclaredMethod("consume", int.class, ResultCapture.class));
-    registerFunc("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
+      registerFunction("func-peek", FunctionalPeek.class.getDeclaredMethod("peek", int.class, String.class));
+      registerFunction("int-cons", IntConsumer.class.getDeclaredMethod("consume", int.class, ResultCapture.class));
+      registerFunction("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -148,9 +147,9 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
 //    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
 
     clearCache();
-    registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
-    registerFunc("int-cons", IntConsumer.class.getDeclaredMethod("consume", int.class, ResultCapture.class));
-    registerFunc("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
+      registerFunction("int-cons", IntConsumer.class.getDeclaredMethod("consume", int.class, ResultCapture.class));
+      registerFunction("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -179,9 +178,9 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
   @Test(timeout = 20000)
   public void testExplicitSchemaMatchTwo() throws Throwable {
     clearCache();
-    registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
-    registerFunc("int-cons", IntConsumer.class.getDeclaredMethod("consume", int.class, ResultCapture.class));
-    registerFunc("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
+      registerFunction("int-cons", IntConsumer.class.getDeclaredMethod("consume", int.class, ResultCapture.class));
+      registerFunction("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -214,9 +213,9 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
 //    GraphVisualizer.PRINT_FLOW_GRAPH = getTestMethodOutputDirectory() + "process";
 
     clearCache();
-    registerFunc("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
-    registerFunc("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
-    registerFunc("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalProducer.class.getDeclaredMethod("produce"));
+      registerFunction("string-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
+      registerFunction("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -254,8 +253,8 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
 
     clearCache();
     loadCoreOps();
-    registerFunc("func-cons", FunctionalMergeConsumer.class.getDeclaredMethod("consume", int.class, String.class, int.class, String.class, MergeResultCapture.class));
-    registerFunc("func-gen-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
+      registerFunction("func-cons", FunctionalMergeConsumer.class.getDeclaredMethod("consume", int.class, String.class, int.class, String.class, MergeResultCapture.class));
+      registerFunction("func-gen-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-gen-prod", 9728);
@@ -292,8 +291,8 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
   public void testTwistedExcplicitSchemaMatch() throws Throwable {
     clearCache();
     loadCoreOps();
-    registerFunc("func-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
-    registerFunc("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
+      registerFunction("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-prod", 100);
@@ -316,8 +315,8 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
   public void testNULLPropagationSingle() throws Throwable {
     clearCache();
     loadCoreOps();
-    registerFunc("func-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
-    registerFunc("func-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
+      registerFunction("func-cons", StringConsumer.class.getDeclaredMethod("consume", String.class, ResultCapture.class));
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-prod", 100);
@@ -337,8 +336,8 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
   public void testNULLPropagationCombine() throws Throwable {
     clearCache();
     loadCoreOps();
-    registerFunc("func-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
-    registerFunc("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
+      registerFunction("func-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
+      registerFunction("func-cons", FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, ResultCapture.class));
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-prod", 100);
@@ -366,8 +365,8 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
   public void testCompoundSingleInput() throws Throwable {
     clearCache();
     loadCoreOps();
-    registerFunc("func-gen-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
-    registerFunc("func-cons", SingleCompoundConsumer.class.getDeclaredMethod("consume", ResultCapture.class, int.class, Object[].class));
+      registerFunction("func-gen-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
+      registerFunction("func-cons", SingleCompoundConsumer.class.getDeclaredMethod("consume", ResultCapture.class, int.class, Object[].class));
 
     OhuaRuntime runtime = new OhuaRuntime();
     createOp(runtime, "func-gen-prod", 100);
@@ -394,8 +393,8 @@ public class testFunctionalOperator extends AbstractFlowTestCase {
 //  public void testInvalidCompoundness() throws Throwable {
 //      clearCache();
 //      loadCoreOps();
-//      registerFunc("func-gen-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
-//      registerFunc("func-cons", CompoundConsumer.class.getDeclaredMethod("consume", Object[].class, Object[].class, MergeResultCapture.class));
+//      registerFunction("func-gen-prod", FunctionalGenericProducer.class.getDeclaredMethod("produce", Object[].class));
+//      registerFunction("func-cons", CompoundConsumer.class.getDeclaredMethod("consume", Object[].class, Object[].class, MergeResultCapture.class));
 //
 //    FlowGraphCompiler compiler = new FlowGraphCompiler();
 //      createOp(compiler, "func-gen-prod", 100);

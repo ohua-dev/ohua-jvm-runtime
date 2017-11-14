@@ -1,21 +1,22 @@
 package ohua.loader;
 
 import ohua.StatefulFunctionProvider;
-import ohua.runtime.lang.operator.StatefulFunction;
-import java.nio.file.*;
-import java.net.URL;
-import java.net.URI;
-import java.util.*;
-import java.util.stream.*;
-import java.util.function.Consumer;
 import ohua.lang.defsfn;
-import java.lang.reflect.Method;
-import java.util.function.Function;
-import ohua.runtime.engine.exceptions.*;
+import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
+import ohua.runtime.lang.operator.StatefulFunction;
+import ohua.util.EmptyIterator;
+import ohua.util.Tuple;
+
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URISyntaxException;
-import ohua.util.*;
-import ohua.runtime.lang.operator.SFNLinker;
+import java.net.URL;
+import java.nio.file.*;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionProvider {
     private final Map<String,Optional<Map<String,Method>>> nsMap = new HashMap<>();
@@ -53,7 +54,8 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
         }   
     }
 
-    private Optional<Map<String,Method>> tryLoadNS(String nsRef) {
+    // TODO expose this in tests but make it private somehow
+    public Optional<Map<String, Method>> tryLoadNS(String nsRef) {
         Optional<Map<String,Method>> m1;
         try {
             Map<String,Method> loaded = loadNamespace(nsRef);
@@ -108,7 +110,7 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
     private void registerAllWithSFNLinker(String nsRef, Iterable<Method> methods) {
         for (Method method : methods) {
             String ref = nsRef + "/" + method.getName();
-            SFNLinker.getInstance().registerUserOperator(ref, method.getDeclaringClass().getName());
+            OperatorFactory.registerUserOperator(ref, method.getDeclaringClass().getName());
         }
     }
 
@@ -154,7 +156,7 @@ public final class JavaProviderFromAnnotatedMethod implements StatefulFunctionPr
 
     private List<Path> findUrls(FileSystem fs, String folder, String glob) throws IOException {
         List<Path> res = new ArrayList<>();
-        for (Path p : Files.newDirectoryStream(fs.getPath(folder, new String[]{}), glob))
+        for (Path p : Files.newDirectoryStream(fs.getPath(folder), glob))
             res.add(p);
         return res;
 

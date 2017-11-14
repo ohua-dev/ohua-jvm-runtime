@@ -5,9 +5,6 @@
  */
 package ohua.runtime.lang;
 
-import ohua.runtime.lang.operator.IFunctionalOperator;
-import ohua.runtime.lang.operator.SFNLinker;
-import ohua.util.Tuple;
 import ohua.runtime.engine.DataFlowProcess;
 import ohua.runtime.engine.RuntimeProcessConfiguration;
 import ohua.runtime.engine.exceptions.Assertion;
@@ -18,6 +15,8 @@ import ohua.runtime.engine.flowgraph.elements.operator.*;
 import ohua.runtime.engine.flowgraph.elements.operator.Arc.ArcType;
 import ohua.runtime.exceptions.CompilationException;
 import ohua.runtime.exceptions.CompilationException.CAUSE;
+import ohua.runtime.lang.operator.IFunctionalOperator;
+import ohua.util.Tuple;
 
 import java.util.*;
 
@@ -96,7 +95,7 @@ public abstract class OhuaFrontend extends DataFlowComposition {
   }
 
   protected IOperatorFactory operatorFactory() {
-    return SFNLinker.getInstance();
+    return _process.getGraph().getOperatorFactory();
   }
 
   /**

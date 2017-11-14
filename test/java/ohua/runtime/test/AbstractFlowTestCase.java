@@ -7,20 +7,18 @@
 package ohua.runtime.test;
 
 import ohua.runtime.engine.*;
+import ohua.runtime.engine.ProcessID.ProcessIDGenerator;
 import ohua.runtime.engine.daapi.MapDataFormat;
+import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.flowgraph.elements.operator.*;
+import ohua.runtime.engine.flowgraph.elements.operator.AbstractOperatorStateMachine.OperatorState;
+import ohua.runtime.engine.flowgraph.elements.operator.AbstractPort.PortState;
 import ohua.runtime.engine.operators.*;
 import ohua.runtime.engine.scheduler.AbstractScheduler;
 import ohua.runtime.test.util.TestUtil;
 import org.junit.Assert;
-
 import org.junit.Before;
 import org.junit.Ignore;
-
-import ohua.runtime.engine.ProcessID.ProcessIDGenerator;
-import ohua.runtime.engine.flowgraph.elements.FlowGraph;
-import ohua.runtime.engine.flowgraph.elements.operator.AbstractPort.PortState;
-import ohua.runtime.engine.flowgraph.elements.operator.AbstractOperatorStateMachine.OperatorState;
 
 import java.util.function.Supplier;
 
@@ -30,12 +28,12 @@ public abstract class AbstractFlowTestCase extends AbstractRegressionTestCase
 
   @Before
   public void loadTestOps(){
-    OperatorFactory.getInstance().registerUserOperator("Generator", GeneratorOperator.class, GeneratorOperator.description());
-    OperatorFactory.getInstance().registerUserOperator("Consumer", ConsumerOperator.class, ConsumerOperator.description());
-    OperatorFactory.getInstance().registerUserOperator("DeterministicMerge", DeterministicMergeOperator.class, DeterministicMergeOperator.description());
-    OperatorFactory.getInstance().registerUserOperator("NonDeterministicMerge", NonDeterministicMergeOperator.class, NonDeterministicMergeOperator.description());
-    OperatorFactory.getInstance().registerUserOperator("Peek", PeekOperator.class, PeekOperator.description());
-    OperatorFactory.getInstance().registerUserOperator("Split", SplitOperator.class, SplitOperator.description());
+    OperatorFactory.registerUserOperator("Generator", GeneratorOperator.class, GeneratorOperator.description());
+    OperatorFactory.registerUserOperator("Consumer", ConsumerOperator.class, ConsumerOperator.description());
+    OperatorFactory.registerUserOperator("DeterministicMerge", DeterministicMergeOperator.class, DeterministicMergeOperator.description());
+    OperatorFactory.registerUserOperator("NonDeterministicMerge", NonDeterministicMergeOperator.class, NonDeterministicMergeOperator.description());
+    OperatorFactory.registerUserOperator("Peek", PeekOperator.class, PeekOperator.description());
+    OperatorFactory.registerUserOperator("Split", SplitOperator.class, SplitOperator.description());
   }
 
   @Before

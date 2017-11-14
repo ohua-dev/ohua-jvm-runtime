@@ -12,8 +12,11 @@ import ohua.runtime.engine.exceptions.OperatorLoadingException;
 import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.operators.IOperatorDescriptionProvider;
 import ohua.runtime.engine.operators.OperatorDescription;
+import ohua.runtime.exceptions.CompilationException;
+import ohua.runtime.lang.operator.*;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -23,25 +26,48 @@ public class OperatorFactory implements IOperatorFactory
   // operators
   private static Map<String, String> _userOperatorRegistry = new HashMap<>();
   private static Map<String, String> _systemOperatorRegistry = new HashMap<>();
-  private static OperatorFactory _factory = new OperatorFactory();
-  private Map<String, OperatorDescription> _operatorDescriptors = new HashMap<>();
-  private IOperatorDescriptionProvider _descriptorProvider = null;
-  private boolean _applyDescriptorForUserOperators = true;
+  private static Map<String, OperatorDescription> _operatorDescriptors = new HashMap<>();
+  private static IOperatorDescriptionProvider _descriptorProvider = new SFNDeserializer();
+  private static boolean _applyDescriptorForUserOperators = true;
+  private final OperatorID.OperatorIDGenerator _idGen = new OperatorID.OperatorIDGenerator();
 
   private OperatorFactory() {
-    // singleton
   }
 
-  public static OperatorFactory getInstance() {
-    return _factory;
+  public static OperatorFactory create() {
+    return new OperatorFactory();
   }
 
-  public void setApplyDescriptorsForUserOperators(boolean apply) {
+  public static void setApplyDescriptorsForUserOperators(boolean apply) {
     _applyDescriptorForUserOperators = apply;
   }
 
   public boolean exists(String operatorName) {
     return _userOperatorRegistry.containsKey(operatorName);
+  }
+
+  public UserOperator createUserOperatorInstance(String operatorName) throws OperatorLoadingException {
+    Class<?> clz = loadOperatorImplementationClass(operatorName);
+    if (UserOperator.class.isAssignableFrom(clz)) {
+      return createOperatorInstance((Class<? extends UserOperator>) clz);
+    } else {
+      Object func = createFunctionObject(clz);
+      try {
+        Method sf = StatefulFunction.resolveMethod(func);
+        AbstractFunctionalOperator op =
+                sf.isAnnotationPresent(DataflowFunction.class) ?
+                        new FunctionalDataflowOperator() :
+                        new FunctionalOperator();
+        op.setFunctionObject(func);
+        return op;
+      } catch (CompilationException ce) {
+        throw new OperatorLoadingException(ce);
+      }
+    }
+  }
+
+  private Object createFunctionObject(Class<?> clz) throws OperatorLoadingException {
+    return StatefulFunction.createStatefulFunctionObject(clz);
   }
 
   public OperatorCore createUserOperatorCore(FlowGraph graph,
@@ -86,7 +112,7 @@ public class OperatorFactory implements IOperatorFactory
 
   protected OperatorCore
   prepareOperator(String operatorName, boolean isUserOperator) throws OperatorLoadingException {
-    OperatorCore core = new OperatorCore(operatorName);
+    OperatorCore core = new OperatorCore(operatorName, _idGen.generateNewOperatorID());
     if(isUserOperator && !_applyDescriptorForUserOperators) {
       // don't load it here. the application using the ops will define the structure by itself.
     } else {
@@ -112,13 +138,6 @@ public class OperatorFactory implements IOperatorFactory
   createOperator(Class<T> operatorImplementationClass, String operatorName) throws OperatorLoadingException {
     T operator = createOperatorInstance(operatorImplementationClass);
     return operator;
-  }
-
-  @SuppressWarnings("unchecked") public UserOperator
-  createUserOperatorInstance(String operatorName) throws OperatorLoadingException {
-    Class<? extends UserOperator> clz =
-            (Class<? extends UserOperator>) loadOperatorImplementationClass(operatorName);
-    return createOperatorInstance(clz);
   }
 
   public <T extends AbstractOperatorAlgorithm> T
@@ -206,11 +225,11 @@ public class OperatorFactory implements IOperatorFactory
     _descriptorProvider = descriptorProvider;
   }
 
-  public boolean registerUserOperator(String alias, String implReference) {
+  public static boolean registerUserOperator(String alias, String implReference) {
     return registerUserOperator(alias, implReference, false);
   }
 
-  public boolean registerUserOperator(String alias, String implReference, boolean update) {
+  public static boolean registerUserOperator(String alias, String implReference, boolean update) {
     if(_userOperatorRegistry.containsKey(alias) && !update) {
       return false;
     } else {
@@ -219,23 +238,23 @@ public class OperatorFactory implements IOperatorFactory
     }
   }
 
-  public boolean registerUserOperator(String alias, Class<? extends UserOperator> opType, OperatorDescription description) {
+  public static boolean registerUserOperator(String alias, Class<? extends UserOperator> opType, OperatorDescription description) {
     _userOperatorRegistry.put(alias, opType.getName());
     _operatorDescriptors.put(alias, description);
     return true;
   }
 
-  public boolean registerSystemOperator(String alias, Class<? extends SystemOperator> opType, OperatorDescription description) {
+  public static boolean registerSystemOperator(String alias, Class<? extends SystemOperator> opType, OperatorDescription description) {
     _systemOperatorRegistry.put(alias, opType.getName());
     _operatorDescriptors.put(alias, description);
     return true;
   }
 
-  public Set<String> getRegisteredUserOperators() {
+  public static Set<String> getRegisteredUserOperators() {
     return _userOperatorRegistry.keySet();
   }
 
-  public void clear() {
+  public static void clear() {
     _userOperatorRegistry = new HashMap<>();
     _systemOperatorRegistry = new HashMap<>();
   }

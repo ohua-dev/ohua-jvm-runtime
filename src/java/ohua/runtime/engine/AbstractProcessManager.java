@@ -6,17 +6,16 @@
 
 package ohua.runtime.engine;
 
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
-import ohua.runtime.engine.operators.system.ProcessControlOperator;
-import ohua.runtime.engine.points.PacketFactory;
 import ohua.runtime.engine.flowgraph.elements.ArcID.ArcIDGenerator;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
+import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorID;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorID.OperatorIDGenerator;
 import ohua.runtime.engine.flowgraph.elements.operator.PortID;
 import ohua.runtime.engine.flowgraph.elements.operator.PortID.PortIDGenerator;
 import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
+import ohua.runtime.engine.operators.system.ProcessControlOperator;
 import ohua.runtime.engine.operators.system.UserGraphExitOperator;
+import ohua.runtime.engine.points.PacketFactory;
 import ohua.runtime.engine.sections.AbstractSection.SectionIDGenerator;
 import ohua.util.Tuple;
 
@@ -34,7 +33,7 @@ public abstract class AbstractProcessManager implements
 {
 
   static{
-    OperatorFactory.getInstance().registerSystemOperator("ProcessController", ProcessControlOperator.class, ProcessControlOperator.description());
+    OperatorFactory.registerSystemOperator("ProcessController", ProcessControlOperator.class, ProcessControlOperator.description());
   }
 
   protected Logger _logger = Logger.getLogger(getClass().getCanonicalName());
@@ -77,7 +76,6 @@ public abstract class AbstractProcessManager implements
   }
 
   public static void resetCounters() {
-    OperatorIDGenerator.resetCounter();
     PortIDGenerator.resetCounter();
     ArcIDGenerator.resetCounter();
     SectionIDGenerator.restCounter();

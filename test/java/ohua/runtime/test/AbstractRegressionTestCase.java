@@ -5,27 +5,32 @@
  */
 package ohua.runtime.test;
 
+import ohua.loader.JavaProviderFromAnnotatedMethod;
 import ohua.runtime.engine.AbstractProcessManager;
-import ohua.runtime.lang.JavaSFNLinker;
+import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 import ohua.runtime.lang.OhuaFrontend;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
-import java.io.File;
 import java.lang.reflect.Method;
 
 public class AbstractRegressionTestCase {
     protected static final String testNS = "test.flow";
     @Rule
     public TestName testName = new TestName();
+    private static JavaProviderFromAnnotatedMethod provider = new JavaProviderFromAnnotatedMethod();
 
     protected static void clearCache() {
-      JavaSFNLinker.clear();
+
     }
 
-    protected static void registerFunc(String name, Method handle) {
-      JavaSFNLinker.registerFunction(testNS, name, handle);
+    protected static void registerFunction(String ns, String name, Method handle) {
+        OperatorFactory.registerUserOperator(ns + "/" + name, handle.getDeclaringClass().getName(), true);
+    }
+
+    protected static void registerFunction(String name, Method handle) {
+        registerFunction(testNS, name, handle);
     }
 
     protected static void createOp(OhuaFrontend runtime, String name, int id) throws Throwable {
@@ -33,7 +38,7 @@ public class AbstractRegressionTestCase {
     }
 
     protected static void loadCoreOps() {
-      JavaSFNLinker.loadCoreOperators();
+        provider.tryLoadNS("ohua.lang");
     }
 
     @Before

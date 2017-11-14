@@ -6,23 +6,20 @@
 
 package ohua.runtime.engine.scheduler;
 
+import ohua.runtime.engine.AbstractProcessManager;
 import ohua.runtime.engine.RuntimeProcessConfiguration;
 import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.flowgraph.elements.operator.Arc;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
-import ohua.runtime.engine.operators.AbstractMergeOperator;
 import ohua.runtime.engine.operators.ConsumerOperator;
 import ohua.runtime.engine.operators.GeneratorOperator;
+import ohua.runtime.engine.sections.OneOpOneSectionGraphBuilder;
+import ohua.runtime.engine.sections.SectionGraph;
 import ohua.runtime.engine.testEnginePhasesMT;
 import ohua.runtime.test.AbstractFlowTestCase;
 import org.junit.Assert;
-
 import org.junit.Test;
-
-import ohua.runtime.engine.AbstractProcessManager;
-import ohua.runtime.engine.sections.OneOpOneSectionGraphBuilder;
-import ohua.runtime.engine.sections.SectionGraph;
 
 import java.util.Collections;
 
@@ -30,9 +27,10 @@ public class testNotificationBasedRuntime extends AbstractFlowTestCase {
 
   public static FlowGraph oneOpOneSectionBuilderSimpleCorrectnessFlow(int amount) throws Exception {
     FlowGraph graph = new FlowGraph();
-    OperatorCore gen = OperatorFactory.getInstance().createUserOperatorCore(graph, "Generator");
+    OperatorFactory operatorFactory = graph.getOperatorFactory();
+    OperatorCore gen = operatorFactory.createUserOperatorCore(graph, "Generator");
     gen.setOperatorName("Left-DataGenerator");
-    OperatorCore consumer = OperatorFactory.getInstance().createUserOperatorCore(graph, "Consumer");
+    OperatorCore consumer = operatorFactory.createUserOperatorCore(graph, "Consumer");
     consumer.setOperatorName("Consumer");
 
     graph.addArc(new Arc(gen.getOutputPort("output"), consumer.getInputPort("input")));

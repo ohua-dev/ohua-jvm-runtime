@@ -6,7 +6,6 @@
 package ohua.runtime.lang;
 
 import clojure.lang.Compiler;
-import ohua.link.JavaBackendProvider;
 import ohua.runtime.test.AbstractRegressionTestCase;
 import ohua.util.Tuple;
 import org.junit.Assert;
@@ -27,11 +26,11 @@ public class testNestedIfStatement extends AbstractRegressionTestCase {
   @Test(timeout = 30000)
   public void testConditionMerge() throws Throwable {
 //    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
-    registerFunc("produce", ClojureTestOps.TestProduceOperator.class.getDeclaredMethod("produce"));
-    registerFunc("add", ClojureTestOps.AddOperator.class.getDeclaredMethod("add", int.class, long.class));
-    registerFunc("subtract", ClojureTestOps.SubtractOperator.class.getDeclaredMethod("subtract", int.class, long.class));
+    registerFunction("produce", ClojureTestOps.TestProduceOperator.class.getDeclaredMethod("produce"));
+    registerFunction("add", ClojureTestOps.AddOperator.class.getDeclaredMethod("add", int.class, long.class));
+    registerFunction("subtract", ClojureTestOps.SubtractOperator.class.getDeclaredMethod("subtract", int.class, long.class));
 
-    JavaBackendProvider.registerFunction("com.ohua.tests.lang", "collect", ClojureTestOps.TestCollectOperator.class.getDeclaredMethod("collect", long.class, long[].class));
+    registerFunction("com.ohua.tests.lang", "collect", ClojureTestOps.TestCollectOperator.class.getDeclaredMethod("collect", long.class, long[].class));
 
     String code =
             "(doto (new ohua.runtime.lang.OhuaRuntime)"

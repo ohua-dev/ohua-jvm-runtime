@@ -11,7 +11,6 @@ import ohua.runtime.engine.flowgraph.elements.FlowGraph;
 import ohua.runtime.engine.flowgraph.elements.operator.Arc;
 import ohua.runtime.engine.flowgraph.elements.operator.IOperatorFactory;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 
 import java.util.function.Supplier;
 
@@ -28,16 +27,14 @@ public abstract class DataFlowComposition implements Supplier<DataFlowProcess>
   
   protected final OperatorCore loadOperator(String operatorType, FlowGraph graph) throws OperatorLoadingException {
     String operatorName = operatorType;
-    IOperatorFactory opFactory = operatorFactory();
+    IOperatorFactory opFactory = graph.getOperatorFactory();
     if(!opFactory.exists(operatorName)) {
       throw new OperatorLoadingException("Not linked: '" + operatorName + "'");
     }
     return opFactory.createUserOperatorCore(graph, operatorName);
   }
-  
-  protected IOperatorFactory operatorFactory(){
-    return OperatorFactory.getInstance();
-  }
+
+  abstract protected IOperatorFactory operatorFactory();
   
   protected final Arc createArc() {
     return new Arc();

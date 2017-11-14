@@ -6,15 +6,13 @@
 package ohua.runtime.lang;
 
 import clojure.lang.Compiler;
-import ohua.link.JavaBackendProvider;
-import ohua.runtime.test.AbstractFlowTestCase;
-import ohua.util.Tuple;
 import ohua.lang.Condition;
 import ohua.lang.Either;
 import ohua.lang.defsfn;
-import ohua.runtime.lang.operator.DataflowFunction;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
-import ohua.runtime.engine.utils.GraphVisualizer;
+import ohua.runtime.lang.operator.DataflowFunction;
+import ohua.runtime.test.AbstractFlowTestCase;
+import ohua.util.Tuple;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -28,7 +26,7 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
 {
   @Before
   public void clearLinker() {
-    OperatorFactory.getInstance().clear();
+    OperatorFactory.clear();
   }
   
   /**
@@ -40,8 +38,8 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
   public void testBasicIf() throws Throwable {
 //    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
     clearCache();
-    registerFunc("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
-    registerFunc("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
+    registerFunction("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
+    registerFunction("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -87,8 +85,8 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
   public void testBasicElse() throws Throwable {
 //    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
     clearCache();
-    registerFunc("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
-    registerFunc("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
+    registerFunction("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
+    registerFunction("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -138,8 +136,8 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
   @Test(timeout = 30000)
   public void testBasic() throws Throwable {
     clearCache();
-    registerFunc("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
-    registerFunc("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
+    registerFunction("func-prod", MultiProducer.class.getDeclaredMethod("produce", List.class));
+    registerFunction("func-cons", testFunctionalOperator.FunctionalConsumer.class.getDeclaredMethod("consume", int.class, String.class, testFunctionalOperator.ResultCapture.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();
@@ -196,18 +194,18 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
   public void testWithConsume() throws Throwable {
     clearCache();
     loadCoreOps();
-    registerFunc("produce", ClojureTestOps.TestProduceOperator.class.getDeclaredMethod("produce"));
-    registerFunc("add", ClojureTestOps.AddOperator.class.getDeclaredMethod("add", int.class, long.class));
-    registerFunc("subtract", ClojureTestOps.SubtractOperator.class.getDeclaredMethod("subtract", int.class, long.class));
+    registerFunction("produce", ClojureTestOps.TestProduceOperator.class.getDeclaredMethod("produce"));
+    registerFunction("add", ClojureTestOps.AddOperator.class.getDeclaredMethod("add", int.class, long.class));
+    registerFunction("subtract", ClojureTestOps.SubtractOperator.class.getDeclaredMethod("subtract", int.class, long.class));
 
-    JavaBackendProvider.registerFunction("ohua.tests.lang", "collect", ClojureTestOps.TestCollectOperator.class.getDeclaredMethod("collect", long.class, long[].class));
+    registerFunction("ohua.tests.lang", "collect", ClojureTestOps.TestCollectOperator.class.getDeclaredMethod("collect", long.class, long[].class));
 
     OhuaRuntime runtime = new OhuaRuntime
             ();
     createOp(runtime, "produce", 100);
-    runtime.createOperator("com.ohua.tests.lang/collect", 101);
+    runtime.createOperator("ohua.tests.lang/collect", 101);
     createOp(runtime, "merge", 102);
-    runtime.createOperator("com.ohua.lang/ifThenElse", 103);
+    runtime.createOperator("ohua.lang/ifThenElse", 103);
     createOp(runtime, "add", 105);
     createOp(runtime, "subtract", 106);
     runtime.registerDependency(100, -1, 103, 1);
@@ -245,8 +243,8 @@ public class testIfThenElseOperator extends AbstractFlowTestCase
 //    GraphVisualizer.PRINT_FLOW_GRAPH = super.getTestMethodOutputDirectory() + "graph";
     clearCache();
     loadCoreOps();
-    registerFunc("produce", ClojureTestOps.TestProduceOperator.class.getDeclaredMethod("produce"));
-    registerFunc("consume", ClojureTestOps.TestConsumeOperator.class.getDeclaredMethod("consume", int.class, int[].class));
+    registerFunction("produce", ClojureTestOps.TestProduceOperator.class.getDeclaredMethod("produce"));
+    registerFunction("consume", ClojureTestOps.TestConsumeOperator.class.getDeclaredMethod("consume", int.class, int[].class));
 
     String code =
         "(doto (new ohua.runtime.lang.OhuaRuntime)"

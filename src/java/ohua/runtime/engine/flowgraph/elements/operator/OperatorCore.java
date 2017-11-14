@@ -10,7 +10,6 @@ import ohua.runtime.engine.daapi.DataAccess;
 import ohua.runtime.engine.flowgraph.elements.AbstractUniqueID;
 import ohua.runtime.engine.flowgraph.elements.abstraction.GraphNode;
 import ohua.runtime.engine.flowgraph.elements.operator.Arc.ArcType;
-import ohua.runtime.engine.flowgraph.elements.operator.OperatorID.OperatorIDGenerator;
 
 import java.util.*;
 
@@ -22,7 +21,7 @@ public final class OperatorCore implements Operator, GraphNode, OperatorStateAcc
   private final Map<PortID, InputPort> _inputPortsMap = new HashMap<>();
   private final Map<PortID, OutputPort> _outputPortsMap = new HashMap<>();
   private int _level = 0;
-  private OperatorID _id = OperatorIDGenerator.generateNewOperatorID();
+    private final OperatorID _id;
   private String _operatorName = null;
 
   private DataAccess _dataLayer = null;
@@ -30,8 +29,9 @@ public final class OperatorCore implements Operator, GraphNode, OperatorStateAcc
   private String _operatorType = null;
   private List<Object> _propertyBag = new LinkedList<>();
 
-  public OperatorCore(String operatorType) {
+    public OperatorCore(String operatorType, OperatorID id) {
     _operatorType = operatorType;
+        _id = id;
   }
 
   protected OperatorAlgorithmAdapter getOperatorAdapter() {
@@ -89,10 +89,6 @@ public final class OperatorCore implements Operator, GraphNode, OperatorStateAcc
 
   public OperatorID getId() {
     return _id;
-  }
-
-  public void setId(OperatorID id) {
-    _id = id;
   }
 
   public int getNumGraphNodeInputs() {

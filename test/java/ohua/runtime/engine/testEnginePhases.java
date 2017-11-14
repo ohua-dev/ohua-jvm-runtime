@@ -11,13 +11,11 @@ import ohua.runtime.engine.flowgraph.elements.operator.Arc;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 import ohua.runtime.engine.operators.AbstractMergeOperator;
+import ohua.runtime.engine.operators.ConsumerOperator;
 import ohua.runtime.engine.operators.GeneratorOperator;
 import ohua.runtime.test.AbstractFlowTestCase;
 import org.junit.Assert;
-
 import org.junit.Test;
-
-import ohua.runtime.engine.operators.ConsumerOperator;
 
 import java.util.Collections;
 
@@ -33,15 +31,16 @@ public class testEnginePhases extends AbstractFlowTestCase
 
   public static FlowGraph deterministicMergeCorrectnessConsumerFlow() throws Exception {
     FlowGraph graph = new FlowGraph();
-    OperatorCore gen1 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Generator");
+    OperatorFactory operatorFactory = graph.getOperatorFactory();
+    OperatorCore gen1 = operatorFactory.createUserOperatorCore(graph, "Generator");
     gen1.setOperatorName("Left-DataGenerator");
-    OperatorCore gen2 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Generator");
+    OperatorCore gen2 = operatorFactory.createUserOperatorCore(graph, "Generator");
     gen2.setOperatorName("Right-DataGenerator");
-    OperatorCore merge = OperatorFactory.getInstance().createUserOperatorCore(graph, "DeterministicMerge");
+    OperatorCore merge = operatorFactory.createUserOperatorCore(graph, "DeterministicMerge");
     merge.setOperatorName("DataMerge");
-    OperatorCore peek = OperatorFactory.getInstance().createUserOperatorCore(graph, "Peek");
+    OperatorCore peek = operatorFactory.createUserOperatorCore(graph, "Peek");
     peek.setOperatorName("Logger");
-    OperatorCore consumer = OperatorFactory.getInstance().createUserOperatorCore(graph, "Consumer");
+    OperatorCore consumer = operatorFactory.createUserOperatorCore(graph, "Consumer");
     consumer.setOperatorName("Consumer");
 
     graph.addArc(new Arc(gen1.getOutputPort("output"), merge.getInputPort("input_1")));

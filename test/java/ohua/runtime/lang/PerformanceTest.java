@@ -5,7 +5,10 @@
  */
 package ohua.runtime.lang;
 
-import ohua.runtime.engine.flowgraph.elements.operator.*;
+import ohua.runtime.engine.flowgraph.elements.operator.AbstractOperatorRuntime;
+import ohua.runtime.engine.flowgraph.elements.operator.Arc;
+import ohua.runtime.engine.flowgraph.elements.operator.NotificationBasedOperatorRuntime;
+import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 import ohua.runtime.lang.operator.AbstractFunctionalOperator;
 import ohua.runtime.lang.operator.LanguageDataFormat;
 import ohua.util.Tuple;
@@ -25,8 +28,9 @@ import java.util.HashSet;
 public class PerformanceTest {
 
   public void testContinuationsPerformance() throws Throwable {
+    OperatorFactory operatorFactory = OperatorFactory.create();
     System.out.println("Starting performance test");
-    AbstractOperatorRuntime core = testSchemaMatcher.createFunctionalOp("com.ohua.lang/algo-in");
+    AbstractOperatorRuntime core = testSchemaMatcher.createFunctionalOp(operatorFactory, "com.ohua.lang/algo-in");
     core.getOp().setOperatorName("algo-in-1");
     testSchemaMatcher.createInput(core, "input-1");
     testSchemaMatcher.createOutput(core, "output-1");
@@ -68,7 +72,8 @@ public class PerformanceTest {
   @Test
   public void testContinuationsPerformance2() throws Throwable {
     System.out.println("Starting performance test");
-    AbstractOperatorRuntime core = testSchemaMatcher.createFunctionalOp("com.ohua.lang/algo-in");
+    OperatorFactory operatorFactory = OperatorFactory.create();
+    AbstractOperatorRuntime core = testSchemaMatcher.createFunctionalOp(operatorFactory, "com.ohua.lang/algo-in");
     core.getOp().setOperatorName("algo-in-1");
     testSchemaMatcher.createInput(core, "input-1");
     testSchemaMatcher.createOutput(core, "output-1");

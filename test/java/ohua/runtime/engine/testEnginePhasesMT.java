@@ -12,14 +12,12 @@ import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorFactory;
 import ohua.runtime.engine.flowgraph.elements.operator.OutputPort;
 import ohua.runtime.engine.operators.AbstractMergeOperator;
+import ohua.runtime.engine.operators.ConsumerOperator;
 import ohua.runtime.engine.operators.GeneratorOperator;
 import ohua.runtime.engine.operators.SplitOperator;
 import ohua.runtime.test.AbstractFlowTestCase;
 import org.junit.Assert;
-
 import org.junit.Test;
-
-import ohua.runtime.engine.operators.ConsumerOperator;
 
 import java.util.Collections;
 
@@ -34,29 +32,30 @@ public class testEnginePhasesMT extends AbstractFlowTestCase {
 
   public static FlowGraph oneOpOneSectionComplexCorrectnessFlow2(String mergeType) throws Exception {
     FlowGraph graph = new FlowGraph();
-    OperatorCore gen1 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Generator");
+    OperatorFactory operatorFactory = graph.getOperatorFactory();
+    OperatorCore gen1 = operatorFactory.createUserOperatorCore(graph, "Generator");
     gen1.setOperatorName("Left-DataGenerator");
-    OperatorCore logger1 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Peek");
+    OperatorCore logger1 = operatorFactory.createUserOperatorCore(graph, "Peek");
     logger1.setOperatorName("Left-Input-Logger");
-    OperatorCore gen2 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Generator");
+    OperatorCore gen2 = operatorFactory.createUserOperatorCore(graph, "Generator");
     gen2.setOperatorName("Right-DataGenerator");
-    OperatorCore logger2 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Peek");
+    OperatorCore logger2 = operatorFactory.createUserOperatorCore(graph, "Peek");
     logger2.setOperatorName("Right-Input-Logger");
-    OperatorCore merge = OperatorFactory.getInstance().createUserOperatorCore(graph, mergeType);
+    OperatorCore merge = operatorFactory.createUserOperatorCore(graph, mergeType);
     merge.setOperatorName("DataMerge");
-    OperatorCore logger3 = OperatorFactory.getInstance().createUserOperatorCore(graph, "Peek");
+    OperatorCore logger3 = operatorFactory.createUserOperatorCore(graph, "Peek");
     logger3.setOperatorName("Logger");
-    OperatorCore split = OperatorFactory.getInstance().createUserOperatorCore(graph, "Split");
+    OperatorCore split = operatorFactory.createUserOperatorCore(graph, "Split");
     split.addOutputPort(new OutputPort(split, "output_1"));
     split.addOutputPort(new OutputPort(split, "output_2"));
     split.setOperatorName("DataSplit");
-    OperatorCore leftOutLogger = OperatorFactory.getInstance().createUserOperatorCore(graph, "Peek");
+    OperatorCore leftOutLogger = operatorFactory.createUserOperatorCore(graph, "Peek");
     leftOutLogger.setOperatorName("Left-Output-Logger");
-    OperatorCore leftConsumer = OperatorFactory.getInstance().createUserOperatorCore(graph, "Consumer");
+    OperatorCore leftConsumer = operatorFactory.createUserOperatorCore(graph, "Consumer");
     leftConsumer.setOperatorName("Left-Consumer");
-    OperatorCore rightOutLogger = OperatorFactory.getInstance().createUserOperatorCore(graph, "Peek");
+    OperatorCore rightOutLogger = operatorFactory.createUserOperatorCore(graph, "Peek");
     rightOutLogger.setOperatorName("Right-Output-Logger");
-    OperatorCore rightConsumer = OperatorFactory.getInstance().createUserOperatorCore(graph, "Consumer");
+    OperatorCore rightConsumer = operatorFactory.createUserOperatorCore(graph, "Consumer");
     rightConsumer.setOperatorName("Right-Consumer");
 
     graph.addArc(new Arc(gen1.getOutputPort("output"), logger1.getInputPort("input")));

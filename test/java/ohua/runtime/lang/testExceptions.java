@@ -7,7 +7,6 @@
 package ohua.runtime.lang;
 
 import ohua.lang.defsfn;
-import ohua.link.JavaBackendProvider;
 import ohua.runtime.test.AbstractFlowTestCase;
 import ohua.util.Tuple;
 import org.junit.Test;
@@ -19,8 +18,8 @@ public class testExceptions extends AbstractFlowTestCase {
 
   @Test(expected = ArrayIndexOutOfBoundsException.class)
   public void testRuntimeExceptionInFunction() throws Throwable {
-    registerFunc("func-prod", testIfThenElseOperator.MultiProducer.class.getDeclaredMethod("produce", List.class));
-    registerFunc("fail", Failure.class.getDeclaredMethod("fail", String.class));
+      registerFunction("func-prod", testIfThenElseOperator.MultiProducer.class.getDeclaredMethod("produce", List.class));
+      registerFunction("fail", Failure.class.getDeclaredMethod("fail", String.class));
     loadCoreOps();
 
     OhuaRuntime runtime = new OhuaRuntime();

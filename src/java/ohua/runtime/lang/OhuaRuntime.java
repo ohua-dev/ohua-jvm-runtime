@@ -5,24 +5,15 @@
  */
 package ohua.runtime.lang;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import ohua.util.Tuple;
-import ohua.runtime.engine.OhuaProcessRunner;
-import ohua.runtime.engine.RuntimeProcessConfiguration;
-import ohua.runtime.engine.SimpleProcessListener;
-import ohua.runtime.engine.UserRequest;
-import ohua.runtime.engine.UserRequestType;
+import ohua.runtime.engine.*;
 import ohua.runtime.engine.exceptions.OperatorLoadingException;
-import ohua.runtime.lang.operator.AbstractFunctionalOperator;
-import ohua.runtime.lang.operator.SFNLinker;
 import ohua.runtime.engine.flowgraph.elements.operator.OperatorCore;
 import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
 import ohua.runtime.exceptions.CompilationException;
+import ohua.runtime.lang.operator.AbstractFunctionalOperator;
+import ohua.util.Tuple;
+
+import java.util.*;
 
 public class OhuaRuntime extends OhuaProgram {
   private OhuaProcessRunner _runner = null;
@@ -140,7 +131,7 @@ public class OhuaRuntime extends OhuaProgram {
       
       @Override
       public AbstractFunctionalOperator createOperator(String type) throws OperatorLoadingException {
-        return (AbstractFunctionalOperator) SFNLinker.getInstance().createUserOperatorInstance(type);
+        return (AbstractFunctionalOperator) runtime._process.getGraph().getOperatorFactory().createUserOperatorInstance(type);
       }
 
       @Override

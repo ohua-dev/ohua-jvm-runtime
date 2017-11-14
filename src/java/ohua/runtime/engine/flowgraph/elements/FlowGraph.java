@@ -24,7 +24,13 @@ public class FlowGraph implements Graph<OperatorCore>
   
   private int _highestOperatorID = 0;
   private int _lowestOperatorID = 100000;
-  
+
+    private OperatorFactory operatorFactory = OperatorFactory.create();
+
+    public OperatorFactory getOperatorFactory() {
+        return operatorFactory;
+    }
+
   public void addOperator(OperatorCore op) {
     if(_operatorRegistry.containsKey(op.getId())) {
       // we do not support overrides

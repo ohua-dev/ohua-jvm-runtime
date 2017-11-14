@@ -6,11 +6,31 @@
 package ohua.runtime.lang;
 
 
+import ohua.lang.OneToNSupport;
+import ohua.lang.defsfn;
+import ohua.runtime.engine.Maybe;
+import ohua.runtime.engine.RuntimeProcessConfiguration;
+import ohua.runtime.engine.SystemPhaseType;
+import ohua.runtime.engine.daapi.DataAccessLayer;
+import ohua.runtime.engine.daapi.DataPacket;
+import ohua.runtime.engine.flowgraph.elements.FlowGraph;
+import ohua.runtime.engine.flowgraph.elements.operator.*;
+import ohua.runtime.engine.flowgraph.elements.packets.EndOfStreamPacketImpl;
+import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
+import ohua.runtime.engine.flowgraph.elements.packets.functionality.handers.DataPacketHandler;
+import ohua.runtime.engine.flowgraph.elements.packets.functionality.handers.EndOfStreamPacketHandler;
+import ohua.runtime.engine.points.InputPortEvents;
+import ohua.runtime.engine.points.PacketFactory;
+import ohua.runtime.engine.points.VisitorFactory;
+import ohua.runtime.exceptions.CompilationException;
 import ohua.runtime.lang.operator.*;
+import ohua.runtime.lang.operator.FunctionalSchemaMatching.SchemaMatcher;
+import ohua.runtime.lang.operator.LanguageDataFormat.LanguageDataPacket;
 import ohua.runtime.test.AbstractRegressionTestCase;
+import ohua.util.Tuple;
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -18,35 +38,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import ohua.runtime.engine.Maybe;
-import ohua.runtime.engine.RuntimeProcessConfiguration;
-import ohua.runtime.engine.points.PacketFactory;
-import ohua.runtime.engine.flowgraph.elements.operator.*;
-import ohua.runtime.lang.operator.FunctionalSchemaMatching.SchemaMatcher;
-import ohua.lang.OneToNSupport;
-import ohua.util.Tuple;
-import ohua.lang.defsfn;
-
-import ohua.runtime.engine.SystemPhaseType;
-import ohua.runtime.engine.daapi.DataAccessLayer;
-import ohua.runtime.engine.daapi.DataPacket;
-import ohua.runtime.engine.points.InputPortEvents;
-import ohua.runtime.engine.points.VisitorFactory;
-import ohua.runtime.engine.flowgraph.elements.FlowGraph;
-import ohua.runtime.lang.operator.LanguageDataFormat.LanguageDataPacket;
-import ohua.runtime.engine.flowgraph.elements.packets.EndOfStreamPacketImpl;
-import ohua.runtime.engine.flowgraph.elements.packets.IMetaDataPacket;
-import ohua.runtime.engine.flowgraph.elements.packets.functionality.handers.DataPacketHandler;
-import ohua.runtime.engine.flowgraph.elements.packets.functionality.handers.EndOfStreamPacketHandler;
-
-import ohua.runtime.exceptions.CompilationException;
-
 public class testSchemaMatcher extends AbstractRegressionTestCase {
   private AbstractOperatorRuntime createOp(Class<? extends UserOperator> opClz) throws Throwable {
     FlowGraph graph = new FlowGraph();
-    OperatorFactory.getInstance().setApplyDescriptorsForUserOperators(false);
-    OperatorFactory.getInstance().setOperatorImplementationClass("test-op", opClz);
-    OperatorFactory.getInstance().createUserOperator(graph, "test-op", "test-op-name");
+    OperatorFactory operatorFactory = graph.getOperatorFactory();
+    OperatorFactory.setApplyDescriptorsForUserOperators(false);
+    operatorFactory.setOperatorImplementationClass("test-op", opClz);
+    operatorFactory.createUserOperator(graph, "test-op", "test-op-name");
     OperatorCore core = graph.getOperator("test-op-name");
     AbstractOperatorRuntime runtime = new NotificationBasedOperatorRuntime(core, new RuntimeProcessConfiguration());
     DataAccessLayer dal = new DataAccessLayer(runtime, new LanguageDataFormat());
@@ -54,14 +52,17 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
     return runtime;
   }
 
-  protected static AbstractOperatorRuntime createFunctionalOp(String fnName) throws Throwable {
-    JavaSFNLinker.loadCoreOperators();
-    SFNLinker.getInstance().setApplyDescriptorsForUserOperators(false);
-    OperatorCore core =
-            SFNLinker.getInstance().createUserOperatorCore(new FlowGraph(), fnName);
+  protected static AbstractOperatorRuntime createFunctionalOp(OperatorFactory operatorFactory, String fnName) throws Throwable {
+    loadCoreOps();
+    OperatorFactory.setApplyDescriptorsForUserOperators(false);
+    OperatorCore core = operatorFactory.createUserOperatorCore(new FlowGraph(), fnName);
     AbstractOperatorRuntime runtime = new NotificationBasedOperatorRuntime(core, new RuntimeProcessConfiguration());
     core.setDataLayer(new DataAccessLayer(runtime, new LanguageDataFormat()));
     return runtime;
+  }
+
+  protected static AbstractOperatorRuntime createOneTimeFunctionalOp(String fnName) throws Throwable {
+    return createFunctionalOp(OperatorFactory.create(), fnName);
   }
 
   protected static void createInput(AbstractOperatorRuntime runtime, String portName) {
@@ -904,7 +905,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
    */
   @Test
   public void testCompoundnessValidation() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/apply");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/apply");
     createInput(core, "input-1");
     core.getOp().setOperatorName("apply-101");
     ((AbstractFunctionalOperator) core.getOp().getOperatorAlgorithm()).setExplicitInputSchemaMatch(new int[] { 1,
@@ -922,7 +923,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
    */
   @Test
   public void testCompoundnessMixedWithGlobal() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/apply");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/apply");
     createInput(core, "input-1");
     createOutput(core, "output-1");
     core.getOp().setOperatorName("apply-101");
@@ -944,7 +945,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testCompoundnessSingleCompoundArg() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/oneToN");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/oneToN");
     createInput(core, "input-1");
     createOutput(core, "output-1");
     core.getOp().setOperatorName("one-to-n-101");
@@ -967,7 +968,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testSingleInputPassedToMoreThanOneSlot() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/size");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/size");
     createInput(core, "input-1");
     createOutput(core, "output-1");
     core.getOp().setOperatorName("size-101");
@@ -1010,7 +1011,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testSingleInputBug() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/oneToN");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/oneToN");
     createInput(core, "input-1");
     createOutput(core, "output-1");
     core.getOp().setOperatorName("one-to-n-101");
@@ -1027,7 +1028,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testEmptyVarArgsArray() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/ifThenElse");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/ifThenElse");
     core.getOp().setOperatorName("ifThenElse-101");
     ((AbstractFunctionalOperator) core.getOp().getOperatorAlgorithm()).setArguments( new Tuple[] {new Tuple(0, null )});
     createOutput(core, "output-1");
@@ -1039,7 +1040,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testSelectNotReady1() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/select");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/select");
     core.getOp().setOperatorName("select-1");
     createInput(core, "input-1");
     ((AbstractFunctionalOperator) core.getOp().getOperatorAlgorithm()).setExplicitInputSchemaMatch(new int[] { 1 },
@@ -1068,7 +1069,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testSelectNotReady2() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/select");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/select");
     core.getOp().setOperatorName("select-1");
     createInput(core, "input-1");
     ((AbstractFunctionalOperator) core.getOp().getOperatorAlgorithm()).setExplicitInputSchemaMatch(new int[] { 1 },
@@ -1098,7 +1099,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testSelectNotReady3() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/select");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/select");
     core.getOp().setOperatorName("select-1");
     createInput(core, "input-1");
     ((AbstractFunctionalOperator) core.getOp().getOperatorAlgorithm()).setExplicitInputSchemaMatch(new int[] { 1 },
@@ -1128,7 +1129,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testContinuationsEnvArgsFirst() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/algoIn");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/algoIn");
     core.getOp().setOperatorName("algo-in-1");
     createInput(core, "input-1");
     createOutput(core, "output-1");
@@ -1151,7 +1152,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testContinuationsEnvArgsLast() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/algoIn");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/algoIn");
     core.getOp().setOperatorName("algo-in-1");
     createInput(core, "input-1");
     createOutput(core, "output-1");
@@ -1174,7 +1175,7 @@ public class testSchemaMatcher extends AbstractRegressionTestCase {
 
   @Test
   public void testContinuationsEnvArgOnly() throws Throwable {
-    AbstractOperatorRuntime core = createFunctionalOp("ohua.lang/algoIn");
+    AbstractOperatorRuntime core = createOneTimeFunctionalOp("ohua.lang/algoIn");
     core.getOp().setOperatorName("algo-in-1");
     createOutput(core, "output-1");
     // first the environment arg and then the dataflow arg
