@@ -40,7 +40,7 @@ public abstract class OneToNSupport {
    * @param graph
    */
   public static void prepare(FlowGraph graph) {
-    for(OperatorCore pairFunc : graph.getOperators("com.ohua.lang/one-to-n.*")) {
+    for(OperatorCore pairFunc : graph.getOperators("ohua.lang/oneToN.*")) {
       List<OutputPort> outPorts = pairFunc.getOutputPorts();
 //      Assertion.invariant(outPorts.size() == 1, "Function '" + pairFunc.getOperatorName() + "' should have single output port but has: " + outPorts.size());
       outPorts.stream().forEach(op -> {
