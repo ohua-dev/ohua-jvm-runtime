@@ -1,6 +1,6 @@
 /*
  * Copyright (c) Sebastian Ertel 2015. All Rights Reserved.
- * 
+ *
  * This source code is licensed under the terms described in the associated LICENSE.TXT file.
  */
 package ohua.lang;
@@ -15,12 +15,12 @@ public class SMap {
     private Iterator<?> _it = null;
 
     @defsfn
-    public Object[] smapFun(Iterable<?> data) {
+    public Object smapFun(Iterable<?> data) {
       if (_it == null) _it = data.iterator();
 
       if (_it.hasNext()) {
         Object d = _it.next();
-        return new Object[]{d};
+        return d;
       } else {
         // FIXME this is an endless loop if the iterable is empty!
         _it = null;
