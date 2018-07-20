@@ -1,3 +1,5 @@
+![](https://raw.githubusercontent.com/ohua-dev/ohua/master/logos/fileIcons/iconFull/java/export_wide_lang_transparent.png "Ohua for the JVM")
+
 # Ohua JVM Integration [![Build Status](https://travis-ci.org/ohua-dev/ohua-jvm-runtime.svg?branch=master)](https://travis-ci.org/ohua-dev/ohua-jvm-runtime)
 
 This a runtime system for Ohua algorithms on the JVM. It supports stateful functions written in Java, Scala and Clojure.
