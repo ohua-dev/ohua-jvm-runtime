@@ -6,5 +6,5 @@ This a runtime system for Ohua algorithms on the JVM. It supports stateful funct
 This JVM backend essentially provides two schedulers: one for streaming applications and one for batch-style applications.
 
 ***
-The Java Logo is trademark of Oracle Corporation (oracle.com/java). 
+The Java Logo is trademark of Oracle Corporation (https://oracle.com/java). 
 The Ohua Logo is distributed under CC-BY (https://ohua-dev.github.io/ohua/).
